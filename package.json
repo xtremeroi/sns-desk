@@ -1,0 +1,43 @@
+{
+  "name": "sns-desk",
+  "productName": "S&S Desk",
+  "version": "0.1.0",
+  "description": "Menu bar companion for Stats & Strats: punch clock + desktop-wide time tracking",
+  "main": "main.js",
+  "private": true,
+  "author": "XTREME ROI",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac dmg --universal"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.xtremeroi.snsdesk",
+    "productName": "S&S Desk",
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "identity": null,
+      "extendInfo": {
+        "LSUIElement": 1
+      }
+    },
+    "dmg": {
+      "title": "S&S Desk",
+      "writeUpdateInfo": false
+    }
+  }
+}

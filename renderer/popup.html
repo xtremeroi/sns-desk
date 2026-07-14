@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: rgba(16, 18, 24, 0.92);
+    --card: rgba(255, 255, 255, 0.06);
+    --edge: rgba(255, 255, 255, 0.10);
+    --text: #e8eaf0;
+    --dim: #9aa1b0;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --accent: #60a5fa;
+  }
+  * { box-sizing: border-box; margin: 0; font-family: -apple-system, "SF Pro Text", sans-serif; }
+  html, body { background: transparent; }
+  body { color: var(--text); font-size: 13px; padding: 10px; }
+  .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-height: 520px; }
+  .hdr { display: flex; align-items: center; gap: 8px; }
+  .hdr .logo { font-weight: 700; letter-spacing: .3px; }
+  .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .iconbtn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
+  .iconbtn:hover { color: var(--text); background: var(--card); }
+  .banner { background: rgba(251, 191, 36, .12); border: 1px solid rgba(251, 191, 36, .35); color: var(--amber); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .banner button { margin-left: auto; background: var(--amber); color: #1a1a1a; border: none; border-radius: 7px; padding: 4px 10px; font-weight: 600; cursor: pointer; }
+  .pill { background: var(--card); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .ticker { font-family: "SF Mono", ui-monospace, monospace; font-size: 30px; font-weight: 600; text-align: center; letter-spacing: 1px; }
+  .ticker.out { color: var(--dim); font-size: 16px; font-weight: 500; padding: 8px 0; }
+  .ticker.break { color: var(--amber); }
+  .ticker.in { color: var(--green); }
+  .sub { text-align: center; color: var(--dim); font-size: 11px; min-height: 14px; }
+  select, input[type=text] { width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--edge); color: var(--text); border-radius: 8px; padding: 7px 9px; font-size: 13px; outline: none; }
+  select:focus, input:focus { border-color: var(--accent); }
+  .row { display: flex; gap: 8px; }
+  .btn { flex: 1; border: none; border-radius: 9px; padding: 9px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn.primary { background: var(--green); color: #06281c; }
+  .btn.warn { background: rgba(251, 191, 36, .18); color: var(--amber); border: 1px solid rgba(251, 191, 36, .4); }
+  .btn.stop { background: rgba(248, 113, 113, .16); color: var(--red); border: 1px solid rgba(248, 113, 113, .4); }
+  .btn:active { transform: scale(.98); }
+  .pendbadge { text-align: center; color: var(--amber); font-size: 11px; }
+  .sect { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
+  .sect h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); font-weight: 600; display: flex; align-items: center; }
+  .sect h3 .total { margin-left: auto; color: var(--text); font-family: ui-monospace, monospace; text-transform: none; letter-spacing: 0; }
+  .apps { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+  .app { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 8px; position: relative; }
+  .app:hover { background: var(--card); }
+  .app .bar { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(96, 165, 250, .10); border-radius: 8px; z-index: 0; }
+  .app .nm { flex: 1; z-index: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app .dur { color: var(--dim); font-family: ui-monospace, monospace; font-size: 12px; z-index: 1; }
+  .app .live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); z-index: 1; }
+  .app .mute { z-index: 1; visibility: hidden; }
+  .app:hover .mute { visibility: visible; }
+  .muted-note { color: var(--dim); font-size: 10px; }
+  .ftr { display: flex; align-items: center; gap: 8px; }
+  .link { background: none; border: none; color: var(--accent); font-size: 11px; cursor: pointer; padding: 0; }
+  .quitlink { color: var(--red); }
+  .spacer { flex: 1; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hdr">
+    <span class="logo">S&amp;S Desk</span>
+    <span class="who" id="who"></span>
+    <button class="iconbtn" id="refresh" title="Sync now">↻</button>
+    <button class="iconbtn" id="close" title="Close this panel (tracking keeps running in the menu bar)">✕</button>
+  </div>
+  <div class="banner" id="banner" style="display:none">
+    <span>Session expired — sign in to sync.</span>
+    <button id="loginBtn">Sign in</button>
+  </div>
+  <div class="pill">
+    <div class="ticker out" id="ticker">Clocked out</div>
+    <div class="sub" id="sub"></div>
+    <select id="client"></select>
+    <input type="text" id="note" placeholder="What are you working on? (optional)" maxlength="80" />
+    <div class="row" id="actions"></div>
+    <div class="pendbadge" id="pend" style="display:none"></div>
+  </div>
+  <div class="sect">
+    <h3>Today on this Mac <span class="total" id="total"></span></h3>
+    <div class="apps" id="apps"></div>
+    <div class="muted-note" id="mutednote" style="display:none"></div>
+  </div>
+  <div class="ftr">
+    <button class="link" id="timepage">Open S&amp;S Time page</button>
+    <span class="spacer"></span>
+    <span class="muted-note">app names only · billed time syncs while clocked in</span>
+  </div>
+  <div class="ftr">
+    <button class="link quitlink" id="quit" title="Stops all tracking and removes S&S Desk from the menu bar">Quit S&amp;S Desk — stop tracking</button>
+  </div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
