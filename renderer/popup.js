@@ -88,6 +88,39 @@ function render() {
   $("pend").style.display = state.pending ? "" : "none";
   $("pend").textContent = state.pending ? `offline · ${state.pending} pending` : "";
 
+  // Clocked-today billing view: accumulated punch time per client, synced
+  // from the server sessions (so it matches the Time page, not this Mac only).
+  const ct = state.clientsToday ?? [];
+  $("clientsect").style.display = ct.length ? "" : "none";
+  if (ct.length) {
+    $("clienttotal").textContent = fmtDur(ct.reduce((s, c) => s + c.ms, 0));
+    const cmax = ct[0].ms || 1;
+    const box = $("clients");
+    box.innerHTML = "";
+    for (const c of ct) {
+      const row = document.createElement("div");
+      row.className = "app";
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.width = `${Math.max(2, (c.ms / cmax) * 100)}%`;
+      const nm = document.createElement("span");
+      nm.className = "nm";
+      nm.textContent = c.n;
+      const dur = document.createElement("span");
+      dur.className = "dur";
+      dur.textContent = fmtDur(c.ms);
+      row.appendChild(bar);
+      row.appendChild(nm);
+      if (c.live) {
+        const dot = document.createElement("span");
+        dot.className = "live";
+        row.appendChild(dot);
+      }
+      row.appendChild(dur);
+      box.appendChild(row);
+    }
+  }
+
   // Local day rollup.
   const byApp = new Map();
   let total = 0;

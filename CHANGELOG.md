@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — 2026-07-14
+
+- **"Clocked today" section:** accumulated punch time per client for the day
+  (green bars, live dot on the current session's client), synced from the
+  server sessions so it matches the Time page's billing view — not just this
+  Mac. Sits above the per-app "Today on this Mac" list.
+
 ## 0.1.1 — 2026-07-14
 
 - **Stale-queue guard:** punches queued while offline/signed-out are dropped on

@@ -129,6 +129,7 @@ function pushState() {
     punch: punch.state(),
     workedMsToday: punch.workedMsToday(),
     sessionMs: punch.sessionMs(),
+    clientsToday: punch.clientTotalsToday(),
     pending: punch.pendingCount() + tracker.pendingCount(),
     localDay: tracker.localDay(today),
     excludeApps: readSettings().excludeApps ?? [],

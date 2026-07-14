@@ -41,6 +41,8 @@
   .btn:active { transform: scale(.98); }
   .pendbadge { text-align: center; color: var(--amber); font-size: 11px; }
   .sect { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
+  .clientsect { flex: 0 0 auto; }
+  .clientsect .bar { background: rgba(52, 211, 153, .12); }
   .sect h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); font-weight: 600; display: flex; align-items: center; }
   .sect h3 .total { margin-left: auto; color: var(--text); font-family: ui-monospace, monospace; text-transform: none; letter-spacing: 0; }
   .apps { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
@@ -80,6 +82,10 @@
     <input type="text" id="note" placeholder="What are you working on? (optional)" maxlength="80" />
     <div class="row" id="actions"></div>
     <div class="pendbadge" id="pend" style="display:none"></div>
+  </div>
+  <div class="sect clientsect" id="clientsect" style="display:none">
+    <h3>Clocked today <span class="total" id="clienttotal"></span></h3>
+    <div class="apps" id="clients"></div>
   </div>
   <div class="sect">
     <h3>Today on this Mac <span class="total" id="total"></span></h3>
