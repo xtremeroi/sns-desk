@@ -148,11 +148,16 @@ function render() {
 
 function renderSub(todayMs, sessionMs) {
   const p = state.punch;
+  // An unsynced clock can silently fork from the server (offline queue or
+  // expired session) — say so right where the numbers are.
+  const unsynced = state.needsLogin || state.pending ? "not synced · " : "";
   $("sub").textContent =
+    unsynced +
     (p.status === "break" ? "On break · " : "") +
     `Session ${fmtHMS(sessionMs)} · ` +
     (p.client ? p.client.n : "General") +
     (p.note ? ` — ${p.note}` : "");
+  $("sub").style.color = unsynced ? "var(--amber)" : "";
 }
 
 // Local 1s ticker between state pushes (day total up top, session below).

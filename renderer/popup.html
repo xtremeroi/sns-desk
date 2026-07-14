@@ -55,7 +55,9 @@
   .muted-note { color: var(--dim); font-size: 10px; }
   .ftr { display: flex; align-items: center; gap: 8px; }
   .link { background: none; border: none; color: var(--accent); font-size: 11px; cursor: pointer; padding: 0; }
-  .quitlink { color: var(--red); }
+  .ftrbtn { background: none; border: 1px solid transparent; color: var(--dim); cursor: pointer; width: 28px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 7px; }
+  .ftrbtn:hover { color: var(--text); background: var(--card); border-color: var(--edge); }
+  .quitbtn:hover { color: var(--red); background: rgba(248, 113, 113, .10); border-color: rgba(248, 113, 113, .35); }
   .spacer { flex: 1; }
 </style>
 </head>
@@ -85,12 +87,14 @@
     <div class="muted-note" id="mutednote" style="display:none"></div>
   </div>
   <div class="ftr">
-    <button class="link" id="timepage">Open S&amp;S Time page</button>
-    <span class="spacer"></span>
     <span class="muted-note">app names only · billed time syncs while clocked in</span>
-  </div>
-  <div class="ftr">
-    <button class="link quitlink" id="quit" title="Stops all tracking and removes S&S Desk from the menu bar">Quit S&amp;S Desk — stop tracking</button>
+    <span class="spacer"></span>
+    <button class="ftrbtn" id="timepage" title="Open the S&S Time page" aria-label="Open the S&S Time page">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </button>
+    <button class="ftrbtn quitbtn" id="quit" title="Quit S&S Desk — stops all tracking on this Mac" aria-label="Quit S&S Desk — stops all tracking on this Mac">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+    </button>
   </div>
 </div>
 <script src="popup.js"></script>

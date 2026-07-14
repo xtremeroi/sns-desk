@@ -11,6 +11,7 @@ what it does and doesn't collect. The short version, verifiable in
 
 - It records the **name** of the frontmost application (e.g. "Chrome",
   "Excel") — never window titles, URLs, keystrokes, screenshots, or content.
+  It never records itself.
 - Activity is sent to the S&S timesheet **only while you are clocked in**.
   Off-the-clock activity never leaves your machine, and you can exclude any
   app from tracking entirely (⊘ button).
