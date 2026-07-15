@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.11 — 2026-07-15
+
+- **Double-click the header to collapse into a mini timer:** just the day
+  ticker and the session · client line, in a tiny glass card. Double-click
+  again to restore the previous size (kept on screen).
+- **The menu bar mark is now a state light:** green while clocked in, amber
+  on break, red when clocked out — visible at a glance even with the panel
+  closed.
+- **S&S glass look:** the panel now wears the S&S dark navy, translucent so
+  the desktop blurs through, and the clock card gets an Apple-glass
+  treatment.
+
 ## 0.1.10 — 2026-07-15
 
 - **Compact widget mode:** shrink the panel (drag the bottom edge) below list

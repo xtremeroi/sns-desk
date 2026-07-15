@@ -41,9 +41,29 @@ function fmtTicker(ms) {
   return `${h}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 }
 
+// The mark in the menu bar is the state light: green clocked in, amber on
+// break, red clocked out (macOS won't let us color the title text itself).
+const TRAY_COLORS = {
+  in: { r: 0x34, g: 0xd3, b: 0x99 },
+  break: { r: 0xfb, g: 0xbf, b: 0x24 },
+  out: { r: 0xf8, g: 0x71, b: 0x71 },
+};
+const trayIcons = {};
+function trayIconFor(status) {
+  if (!trayIcons[status]) {
+    trayIcons[status] = require("./lib/tray-icon.js").trayIcon(nativeImage, 16, TRAY_COLORS[status] ?? null);
+  }
+  return trayIcons[status];
+}
+
+let trayStatus = null;
 function updateTray() {
   if (!tray) return;
   const st = punch.state();
+  if (st.status !== trayStatus) {
+    trayStatus = st.status;
+    tray.setImage(trayIconFor(st.status));
+  }
   const pend = punch.pendingCount() + tracker.pendingCount();
   const flag = pend ? " ⇡" : needsLogin || punch.needsLogin ? " ⚠" : "";
   // Tray shows the DAY total, so a client switch never resets the ticker.
@@ -118,7 +138,7 @@ function createPopup() {
     ...(saved && Number.isFinite(saved.x) ? { x: saved.x, y: saved.y } : {}),
     minWidth: 360,
     maxWidth: 360,
-    minHeight: 252, // small enough for compact widget mode (ticker + controls)
+    minHeight: 160, // small enough for mini timer mode (ticker + session line)
     show: false,
     frame: false,
     resizable: true,
@@ -366,6 +386,25 @@ ipcMain.handle("set-exclude", (_e, apps) => {
   pushState();
 });
 ipcMain.handle("hide-popup", () => { if (popup && !popup.isDestroyed()) popup.hide(); });
+// Double-clicking the header collapses the panel into a mini timer (day
+// ticker + session line) and back to the previous height.
+const MINI_HEIGHT = 172;
+ipcMain.handle("toggle-mini", () => {
+  if (!popup || popup.isDestroyed()) return;
+  const b = popup.getBounds();
+  const s = readSettings();
+  if (b.height > 230) {
+    s.preMiniHeight = b.height;
+    writeSettings(s);
+    popup.setBounds({ ...b, height: MINI_HEIGHT });
+  } else {
+    // Expand, clamped so the taller panel stays on screen.
+    const wa = screen.getDisplayMatching(b).workArea;
+    const height = Math.min(Math.max(s.preMiniHeight ?? 584, 440), wa.height);
+    const y = Math.min(Math.max(b.y, wa.y), wa.y + wa.height - height);
+    popup.setBounds({ x: b.x, y, width: b.width, height });
+  }
+});
 ipcMain.handle("toggle-pin", () => {
   if (!popup || popup.isDestroyed()) return false;
   const next = !popup.isAlwaysOnTop();

@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("sns", {
   setExclude: (apps) => ipcRenderer.invoke("set-exclude", apps),
   hidePopup: () => ipcRenderer.invoke("hide-popup"),
   togglePin: () => ipcRenderer.invoke("toggle-pin"),
+  toggleMini: () => ipcRenderer.invoke("toggle-mini"),
   dragStart: () => ipcRenderer.invoke("drag-start"),
   dragEnd: () => ipcRenderer.invoke("drag-end"),
   quit: () => ipcRenderer.invoke("quit"),

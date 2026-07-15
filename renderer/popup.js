@@ -244,6 +244,11 @@ document.querySelector(".hdr").addEventListener("mousedown", (e) => {
   if (e.button !== 0 || e.target.closest("button")) return;
   sns.dragStart();
 });
+// Double-click the header: collapse to the mini timer / expand back.
+document.querySelector(".hdr").addEventListener("dblclick", (e) => {
+  if (e.target.closest("button")) return;
+  sns.toggleMini();
+});
 window.addEventListener("mouseup", () => sns.dragEnd());
 window.addEventListener("blur", () => sns.dragEnd());
 
