@@ -20,6 +20,7 @@
   .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-height: 520px; }
   .hdr { display: flex; align-items: center; gap: 8px; }
   .hdr .logo { font-weight: 700; letter-spacing: .3px; }
+  .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; }
   .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .iconbtn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
   .iconbtn:hover { color: var(--text); background: var(--card); }
@@ -67,6 +68,7 @@
 <div class="shell">
   <div class="hdr">
     <span class="logo">S&amp;S Desk</span>
+    <span class="ver" id="ver" title="App version"></span>
     <span class="who" id="who"></span>
     <button class="iconbtn" id="refresh" title="Sync now">↻</button>
     <button class="iconbtn" id="close" title="Close this panel (tracking keeps running in the menu bar)">✕</button>

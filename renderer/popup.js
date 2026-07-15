@@ -27,6 +27,7 @@ function render() {
   if (!state) return;
   const p = state.punch;
 
+  $("ver").textContent = state.version ? `v${state.version}` : "";
   $("who").textContent = state.actor ?? "";
   $("banner").style.display = state.needsLogin ? "flex" : "none";
 

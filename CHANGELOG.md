@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3 — 2026-07-14
+
+- **Version badge:** the app version now shows in the popup header (e.g.
+  `v0.1.3`) so you always know which release you're running. Every revision
+  bumps the version from here on.
+- Companion release to the S&S web deploy that makes the clock Desk-only:
+  the web pill is now a display-only mirror (status, session, day total,
+  client) and web client selection no longer switches billing attribution.
+
 ## 0.1.2 — 2026-07-14
 
 - **"Clocked today" section:** accumulated punch time per client for the day

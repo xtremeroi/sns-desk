@@ -123,6 +123,7 @@ function pushState() {
   if (!popup || popup.isDestroyed() || !popup.isVisible()) return;
   const today = api.localDate();
   popup.webContents.send("state", {
+    version: app.getVersion(),
     needsLogin: needsLogin || punch.needsLogin,
     actor: globalState.actor,
     roster: globalState.roster,
