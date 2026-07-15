@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4 — 2026-07-14
+
+- **Fresh note per client switch:** selecting a client while clocked in now
+  opens the "What are you working on?" field (Enter saves, Esc skips), and the
+  previous segment's note no longer carries over — each billed segment gets its
+  own note. (Server-side note-carry removed in the same deploy.)
+
 ## 0.1.3 — 2026-07-14
 
 - **Version badge:** the app version now shows in the popup header (e.g.

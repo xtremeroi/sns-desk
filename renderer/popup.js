@@ -1,6 +1,7 @@
 /* global sns */
 let state = null;
-let tickBase = null; // { workedMs, at } for the local 1s ticker
+let tickBase = null; // ticker base for the local 1s updates
+let noteAsk = false; // client switch happened → ask "what are you working on"
 
 const $ = (id) => document.getElementById(id);
 const fmtHMS = (ms) => {
@@ -62,7 +63,9 @@ function render() {
     tickBase = { todayMs: state.workedMsToday, sessionMs: state.sessionMs, at: Date.now(), frozen: p.status === "break" };
     t.textContent = fmtHMS(state.workedMsToday);
     renderSub(state.workedMsToday, state.sessionMs);
-    $("note").style.display = "none";
+    // Hidden while clocked in — except right after a client switch, when a
+    // fresh segment wants a fresh note (Enter saves, Esc skips).
+    $("note").style.display = noteAsk ? "" : "none";
   }
 
   // Action buttons.
@@ -202,11 +205,34 @@ setInterval(() => {
   renderSub(tickBase.todayMs + d, tickBase.sessionMs + d);
 }, 1000);
 
-// Client switch while clocked in → split the running segment server-side.
+// Client switch while clocked in → split the running segment server-side,
+// then ask what this new segment is about (every switch, fresh note).
 $("client").addEventListener("change", () => {
   if (!state || state.punch.status === "out") return;
   const c = selectedClient();
-  if (c) act("switch", { client: c });
+  if (!c) return;
+  act("switch", { client: c });
+  noteAsk = true;
+  const n = $("note");
+  n.value = "";
+  n.style.display = "";
+  n.focus();
+});
+
+// While clocked in, the note field attaches to the open segment.
+$("note").addEventListener("keydown", (e) => {
+  if (!state || state.punch.status === "out") return;
+  if (e.key === "Enter") {
+    const v = $("note").value.trim();
+    if (v) act("note", { note: v });
+    noteAsk = false;
+    $("note").value = "";
+    $("note").style.display = "none";
+  } else if (e.key === "Escape") {
+    noteAsk = false;
+    $("note").value = "";
+    $("note").style.display = "none";
+  }
 });
 
 $("refresh").onclick = () => sns.refresh();
