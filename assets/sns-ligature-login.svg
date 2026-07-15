@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 89" role="img" aria-label="Stats and Strats">
+  <!-- S&S ligature mark for the Auth0 login card (white bars, light-violet stubs, transparent bg) -->
+  <rect x="0"  y="0"  width="90" height="13" rx="6.5" fill="#f2f5fb"/>
+  <rect x="0"  y="19" width="22" height="13" rx="6.5" fill="#a78bfa"/>
+  <rect x="34" y="19" width="22" height="13" rx="6.5" fill="#a78bfa"/>
+  <rect x="0"  y="38" width="90" height="13" rx="6.5" fill="#f2f5fb"/>
+  <rect x="34" y="57" width="22" height="13" rx="6.5" fill="#a78bfa"/>
+  <rect x="68" y="57" width="22" height="13" rx="6.5" fill="#a78bfa"/>
+  <rect x="0"  y="76" width="90" height="13" rx="6.5" fill="#f2f5fb"/>
+</svg>
