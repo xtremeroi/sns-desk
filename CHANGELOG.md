@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5 — 2026-07-14
+
+- **Fix: switching to "No client (General)" now works like any client switch**
+  — it splits the running segment (previously your time silently kept billing
+  the prior client) and opens the "What are you working on?" prompt.
+  Requires the matching server update (deployed).
+
 ## 0.1.4 — 2026-07-14
 
 - **Fresh note per client switch:** selecting a client while clocked in now

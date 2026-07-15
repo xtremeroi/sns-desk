@@ -210,8 +210,9 @@ setInterval(() => {
 $("client").addEventListener("change", () => {
   if (!state || state.punch.status === "out") return;
   const c = selectedClient();
-  if (!c) return;
-  act("switch", { client: c });
+  if (c) act("switch", { client: c });
+  else if (state.punch.client) act("switch", { general: true }); // client → General splits too
+  else return; // General → General: nothing changed
   noteAsk = true;
   const n = $("note");
   n.value = "";
