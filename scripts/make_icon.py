@@ -1,54 +1,54 @@
-# Generates the S&S Desk app icon: dark rounded square, green punch-clock dot,
-# "S&S" wordmark. Follows macOS Big Sur icon geometry (content inset ~10%).
-from PIL import Image, ImageDraw, ImageFont
+# Generates the S&S Desk app icon: the Ligature mark (two bar-chart S glyphs
+# sharing the long bars) on the brand icon tile — violet gradient
+# (#7c3aed -> #5b21b6), 22.5% corner radius, white long bars, #d9ccfb stubs.
+# Geometry per the S&S logo spec: glyph 90x89, bars h=13 rx=6.5, pitch 19.
+from PIL import Image, ImageDraw
 import os, subprocess
 
 SIZE = 1024
+# macOS Big Sur icon: tile ~80% of frame, centered.
+M = int(SIZE * 0.10)
+TILE = SIZE - 2 * M
+RADIUS = int(TILE * 0.225)
+
 img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+
+# Vertical gradient tile, masked to the rounded rect.
+grad = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+gd = ImageDraw.Draw(grad)
+top, bottom = (0x7C, 0x3A, 0xED), (0x5B, 0x21, 0xB6)
+for y in range(M, SIZE - M):
+    t = (y - M) / TILE
+    c = tuple(round(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
+    gd.line([(M, y), (SIZE - M, y)], fill=c + (255,))
+mask = Image.new("L", (SIZE, SIZE), 0)
+ImageDraw.Draw(mask).rounded_rectangle([M, M, SIZE - M, SIZE - M], radius=RADIUS, fill=255)
+img.paste(grad, (0, 0), mask)
+
+# The mark, centered, ~56% of tile width.
+BARS = [  # x, y, w  (h=13, rx=6.5) in 90x89 glyph space; stubs get the accent
+    (0, 0, 90, False), (0, 19, 22, True), (34, 19, 22, True),
+    (0, 38, 90, False), (34, 57, 22, True), (68, 57, 22, True),
+    (0, 76, 90, False),
+]
+GW, GH, PH, PR = 90, 89, 13, 6.5
+s = (TILE * 0.56) / GW
+ox = (SIZE - GW * s) / 2
+oy = (SIZE - GH * s) / 2
 d = ImageDraw.Draw(img)
-
-# Rounded-square canvas (Big Sur style: ~80% of frame, centered)
-m = int(SIZE * 0.10)
-r = int(SIZE * 0.18)
-d.rounded_rectangle([m, m, SIZE - m, SIZE - m], radius=r, fill=(16, 18, 24, 255), outline=(70, 76, 92, 255), width=6)
-
-# Subtle top gradient sheen
-for i in range(200):
-    a = int(26 * (1 - i / 200))
-    d.rounded_rectangle([m + 8, m + 8 + i, SIZE - m - 8, m + 10 + i], radius=0, fill=(255, 255, 255, a)) if i < 2 else None
-
-def font(size):
-    for p in ["/System/Library/Fonts/SFNSRounded.ttf", "/System/Library/Fonts/SFNS.ttf",
-              "/System/Library/Fonts/Supplemental/Arial Bold.ttf", "/System/Library/Fonts/Helvetica.ttc"]:
-        if os.path.exists(p):
-            try:
-                return ImageFont.truetype(p, size)
-            except Exception:
-                continue
-    return ImageFont.load_default()
-
-# Wordmark
-f = font(340)
-text = "S&S"
-bb = d.textbbox((0, 0), text, font=f)
-tw, th = bb[2] - bb[0], bb[3] - bb[1]
-tx, ty = (SIZE - tw) / 2 - bb[0], (SIZE - th) / 2 - bb[1] - 60
-d.text((tx, ty), text, font=f, fill=(232, 234, 240, 255))
-
-# Green "clocked in" ticker dot + bar under the wordmark
-bar_y = int(SIZE * 0.66)
-d.rounded_rectangle([SIZE * 0.30, bar_y, SIZE * 0.70, bar_y + 46], radius=23, fill=(37, 44, 58, 255))
-d.ellipse([SIZE * 0.315, bar_y + 8, SIZE * 0.315 + 30, bar_y + 38], fill=(52, 211, 153, 255))
-f2 = font(38)
-d.text((SIZE * 0.365, bar_y + 2), "0:00:00", font=f2, fill=(154, 161, 176, 255))
+WHITE, STUB = (255, 255, 255, 255), (0xD9, 0xCC, 0xFB, 255)
+for (bx, by, bw, stub) in BARS:
+    d.rounded_rectangle(
+        [ox + bx * s, oy + by * s, ox + (bx + bw) * s, oy + (by + PH) * s],
+        radius=PR * s, fill=STUB if stub else WHITE)
 
 out = os.path.dirname(os.path.abspath(__file__))
 iconset = os.path.join(out, "icon.iconset")
 os.makedirs(iconset, exist_ok=True)
-for s in [16, 32, 64, 128, 256, 512, 1024]:
-    im = img.resize((s, s), Image.LANCZOS)
-    im.save(os.path.join(iconset, f"icon_{s}x{s}.png"))
-    if s <= 512:
-        img.resize((s * 2, s * 2), Image.LANCZOS).save(os.path.join(iconset, f"icon_{s}x{s}@2x.png"))
-subprocess.run(["iconutil", "-c", "icns", iconset, "-o", os.path.join(out, "icon.icns")], check=True)
-print("icns written")
+for sz in [16, 32, 64, 128, 256, 512, 1024]:
+    img.resize((sz, sz), Image.LANCZOS).save(os.path.join(iconset, f"icon_{sz}x{sz}.png"))
+    if sz <= 512:
+        img.resize((sz * 2, sz * 2), Image.LANCZOS).save(os.path.join(iconset, f"icon_{sz}x{sz}@2x.png"))
+subprocess.run(["iconutil", "-c", "icns", iconset, "-o",
+                os.path.join(os.path.dirname(out), "build", "icon.icns")], check=True)
+print("build/icon.icns written")

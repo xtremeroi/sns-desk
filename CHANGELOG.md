@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 — 2026-07-15
+
+- **S&S Ligature mark everywhere:** menu bar icon (template image, adapts to
+  light/dark menu bars), popup header, and a new app icon — the brand tile
+  (violet gradient, white bars, lavender stubs) replacing the placeholder.
+
 ## 0.1.5 — 2026-07-14
 
 - **Fix: switching to "No client (General)" now works like any client switch**

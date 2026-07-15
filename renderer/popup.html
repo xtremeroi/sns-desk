@@ -19,6 +19,7 @@
   body { color: var(--text); font-size: 13px; padding: 10px; }
   .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-height: 520px; }
   .hdr { display: flex; align-items: center; gap: 8px; }
+  .hdr .mark { flex: 0 0 auto; }
   .hdr .logo { font-weight: 700; letter-spacing: .3px; }
   .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; }
   .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -67,6 +68,15 @@
 <body>
 <div class="shell">
   <div class="hdr">
+    <svg class="mark" width="15" height="15" viewBox="0 0 90 89" aria-hidden="true">
+      <rect x="0" y="0" width="90" height="13" rx="6.5" fill="#e9ebf2"/>
+      <rect x="0" y="19" width="22" height="13" rx="6.5" fill="#8b5cf6"/>
+      <rect x="34" y="19" width="22" height="13" rx="6.5" fill="#8b5cf6"/>
+      <rect x="0" y="38" width="90" height="13" rx="6.5" fill="#e9ebf2"/>
+      <rect x="34" y="57" width="22" height="13" rx="6.5" fill="#8b5cf6"/>
+      <rect x="68" y="57" width="22" height="13" rx="6.5" fill="#8b5cf6"/>
+      <rect x="0" y="76" width="90" height="13" rx="6.5" fill="#e9ebf2"/>
+    </svg>
     <span class="logo">S&amp;S Desk</span>
     <span class="ver" id="ver" title="App version"></span>
     <span class="who" id="who"></span>

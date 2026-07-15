@@ -172,7 +172,8 @@ app.whenReady().then(() => {
     excludeApps: () => readSettings().excludeApps ?? [],
   });
 
-  tray = new Tray(nativeImage.createEmpty());
+  // Ligature mark as a template icon: macOS flips it black/white with the bar.
+  tray = new Tray(require("./lib/tray-icon.js").trayIcon(nativeImage));
   tray.setTitle("S&S");
   tray.on("click", togglePopup);
   // Right-click = the conventional menu-bar-app menu, with an unambiguous Quit.
