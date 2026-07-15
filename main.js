@@ -56,21 +56,33 @@ function updateTray() {
 function togglePopup() {
   if (!popup) return;
   if (popup.isVisible()) return popup.hide();
-  const b = tray.getBounds();
-  const { width } = popup.getBounds();
-  popup.setPosition(Math.round(b.x + b.width / 2 - width / 2), Math.round(b.y + b.height + 4), false);
+  // First open drops under the tray; after that the window opens wherever
+  // the user last moved/resized it (persisted in settings).
+  if (!readSettings().popupBounds) {
+    const b = tray.getBounds();
+    const { width } = popup.getBounds();
+    popup.setPosition(Math.round(b.x + b.width / 2 - width / 2), Math.round(b.y + b.height + 4), false);
+  }
   popup.show();
   pushState();
 }
 
 // ── Windows ─────────────────────────────────────────────────────────────────
 function createPopup() {
+  // Floating panel, not a tray flyout: draggable by its header, resizable in
+  // height (width is fixed), position/size remembered, and it stays put on
+  // blur — the tray click or ✕ closes it.
+  const saved = readSettings().popupBounds;
   popup = new BrowserWindow({
     width: 360,
-    height: 584,
+    height: saved?.height ?? 584,
+    ...(saved && Number.isFinite(saved.x) ? { x: saved.x, y: saved.y } : {}),
+    minWidth: 360,
+    maxWidth: 360,
+    minHeight: 440,
     show: false,
     frame: false,
-    resizable: false,
+    resizable: true,
     fullscreenable: false,
     skipTaskbar: true,
     transparent: true,
@@ -78,7 +90,13 @@ function createPopup() {
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true },
   });
   popup.loadFile(path.join(__dirname, "renderer", "popup.html"));
-  popup.on("blur", () => { if (!popup.webContents.isDevToolsOpened()) popup.hide(); });
+  const saveBounds = () => {
+    const s = readSettings();
+    s.popupBounds = popup.getBounds();
+    writeSettings(s);
+  };
+  popup.on("moved", saveBounds);
+  popup.on("resized", saveBounds);
 }
 
 function openLogin() {

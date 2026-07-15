@@ -15,11 +15,13 @@
     --accent: #60a5fa;
   }
   * { box-sizing: border-box; margin: 0; font-family: -apple-system, "SF Pro Text", sans-serif; }
-  html, body { background: transparent; }
+  html, body { background: transparent; height: 100%; }
   body { color: var(--text); font-size: 13px; padding: 10px; }
-  .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-height: 520px; }
-  .hdr { display: flex; align-items: center; gap: 8px; }
+  .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; height: 100%; }
+  /* The header doubles as the drag handle for moving the window. */
+  .hdr { display: flex; align-items: center; gap: 8px; -webkit-app-region: drag; }
   .hdr .mark { flex: 0 0 auto; }
+  .hdr .iconbtn { -webkit-app-region: no-drag; }
   .hdr .logo { font-weight: 700; letter-spacing: .3px; }
   .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; }
   .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

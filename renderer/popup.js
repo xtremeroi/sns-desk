@@ -140,7 +140,7 @@ function render() {
   const max = rows.length ? rows[0][1] : 1;
   const apps = $("apps");
   apps.innerHTML = "";
-  for (const [name, ms] of rows.slice(0, 14)) {
+  for (const [name, ms] of rows.slice(0, 60)) {
     const row = document.createElement("div");
     row.className = "app";
     const bar = document.createElement("div");
