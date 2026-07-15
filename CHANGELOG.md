@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.7 — 2026-07-15
+
+- **Floating panel:** the popup is now a real window — drag it anywhere by its
+  header, resize it vertically (width stays fixed), and it remembers its
+  position and size. It no longer closes when you click elsewhere; the menu
+  bar icon or ✕ closes it. Taller panel = more of the day lists visible.
+- **Icon-only tray when clocked out:** just the S&S mark — text appears only
+  when it means something (running ticker, break, ⚠ needs sign-in, ⇡ pending).
+
 ## 0.1.6 — 2026-07-15
 
 - **S&S Ligature mark everywhere:** menu bar icon (template image, adapts to
