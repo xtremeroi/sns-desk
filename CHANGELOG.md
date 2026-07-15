@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.9 — 2026-07-15
+
+- **One-time purge of old local logs:** "Today on this Mac" was still showing
+  app usage recorded by versions before the clocked-in-only gate (0.1.8
+  stopped new off-clock recording but didn't erase history). First launch of
+  0.1.9 clears the local day logs once, so the view honors "clocked out means
+  invisible" retroactively. Billed time on the server is untouched.
+- **System surfaces never tracked:** the macOS lock screen ("loginwindow"),
+  screensaver, and security prompts are excluded from tracking entirely.
+
 ## 0.1.8 — 2026-07-15
 
 - **Fix: window dragging no longer dies after closing and reopening the

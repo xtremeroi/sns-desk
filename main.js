@@ -221,6 +221,23 @@ app.whenReady().then(() => {
   session.defaultSession.setUserAgent(CHROME_UA);
   console.log("[sns-desk] userData:", app.getPath("userData"));
 
+  // One-time migration (0.1.9): purge local day logs written before the
+  // "clocked out means invisible" gate existed — they contain off-clock app
+  // usage from older versions that the promise says should never persist.
+  // Billed data is untouched (it lives on the server); only the local
+  // "Today on this Mac" history resets once.
+  {
+    const s = readSettings();
+    if (!s.localLogPurgedV019) {
+      try {
+        const daysDir = path.join(app.getPath("userData"), "days");
+        for (const f of fs.readdirSync(daysDir)) fs.unlinkSync(path.join(daysDir, f));
+      } catch { /* nothing to purge */ }
+      s.localLogPurgedV019 = true;
+      writeSettings(s);
+    }
+  }
+
   punch = new Punch(app.getPath("userData"), () => updateTray());
   tracker = new Tracker({
     userData: app.getPath("userData"),
