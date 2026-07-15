@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.10 — 2026-07-15
+
+- **Compact widget mode:** shrink the panel (drag the bottom edge) below list
+  height and it becomes a live ticker card — clock, session, client picker,
+  punch buttons — like a desktop widget. Stretch it back for the full view.
+- **Pin on top:** new pin button in the header floats the panel above other
+  windows; state is remembered.
+- **Launch at login:** on by default for installed builds (toggle in the menu
+  bar right-click menu), so the clock is always there after a restart.
+
 ## 0.1.9 — 2026-07-15
 
 - **One-time purge of old local logs:** "Today on this Mac" was still showing

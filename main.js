@@ -118,7 +118,7 @@ function createPopup() {
     ...(saved && Number.isFinite(saved.x) ? { x: saved.x, y: saved.y } : {}),
     minWidth: 360,
     maxWidth: 360,
-    minHeight: 440,
+    minHeight: 252, // small enough for compact widget mode (ticker + controls)
     show: false,
     frame: false,
     resizable: true,
@@ -129,6 +129,7 @@ function createPopup() {
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true },
   });
   popup.loadFile(path.join(__dirname, "renderer", "popup.html"));
+  if (readSettings().pinnedOnTop) popup.setAlwaysOnTop(true, "floating");
   const saveBounds = () => {
     const s = readSettings();
     s.popupBounds = popup.getBounds();
@@ -182,6 +183,7 @@ function pushState() {
   const today = api.localDate();
   popup.webContents.send("state", {
     version: app.getVersion(),
+    pinned: !!(popup && !popup.isDestroyed() && popup.isAlwaysOnTop()),
     needsLogin: needsLogin || punch.needsLogin,
     actor: globalState.actor,
     roster: globalState.roster,
@@ -255,11 +257,30 @@ app.whenReady().then(() => {
   tray.on("right-click", () => {
     tray.popUpContextMenu(Menu.buildFromTemplate([
       { label: "Open S&S Desk", click: () => { if (!popup.isVisible()) togglePopup(); } },
+      {
+        label: "Launch at Login",
+        type: "checkbox",
+        enabled: app.isPackaged,
+        checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
+        click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }),
+      },
       { type: "separator" },
       { label: "Quit S&S Desk (stop tracking)", click: () => quitFlow() },
     ]));
   });
   createPopup();
+
+  // Launch at login, on by default for installed builds (first run only —
+  // if someone removes it in System Settings we don't fight them). The tray
+  // menu has the toggle.
+  if (app.isPackaged) {
+    const s = readSettings();
+    if (!s.loginItemInitialized) {
+      app.setLoginItemSettings({ openAtLogin: true });
+      s.loginItemInitialized = true;
+      writeSettings(s);
+    }
+  }
 
   tracker.start();
   // The persisted cookie store loads asynchronously; a fetch fired straight
@@ -345,4 +366,14 @@ ipcMain.handle("set-exclude", (_e, apps) => {
   pushState();
 });
 ipcMain.handle("hide-popup", () => { if (popup && !popup.isDestroyed()) popup.hide(); });
+ipcMain.handle("toggle-pin", () => {
+  if (!popup || popup.isDestroyed()) return false;
+  const next = !popup.isAlwaysOnTop();
+  popup.setAlwaysOnTop(next, "floating");
+  const s = readSettings();
+  s.pinnedOnTop = next;
+  writeSettings(s);
+  pushState();
+  return next;
+});
 ipcMain.handle("quit", () => quitFlow());

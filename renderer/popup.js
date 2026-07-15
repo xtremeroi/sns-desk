@@ -29,6 +29,8 @@ function render() {
   const p = state.punch;
 
   $("ver").textContent = state.version ? `v${state.version}` : "";
+  $("pin").classList.toggle("on", !!state.pinned);
+  $("pin").title = state.pinned ? "Unpin (stop floating above other windows)" : "Pin on top of other windows";
   $("who").textContent = state.actor ?? "";
   $("banner").style.display = state.needsLogin ? "flex" : "none";
 
@@ -246,6 +248,7 @@ window.addEventListener("mouseup", () => sns.dragEnd());
 window.addEventListener("blur", () => sns.dragEnd());
 
 $("refresh").onclick = () => sns.refresh();
+$("pin").onclick = () => sns.togglePin();
 $("close").onclick = () => sns.hidePopup();
 $("quit").onclick = () => sns.quit();
 $("loginBtn").onclick = () => sns.login();

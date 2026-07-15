@@ -1,7 +1,7 @@
 {
   "name": "sns-desk",
   "productName": "S&S Desk",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Menu bar companion for Stats & Strats: punch clock + desktop-wide time tracking",
   "main": "main.js",
   "private": true,
