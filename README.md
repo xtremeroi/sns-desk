@@ -12,9 +12,10 @@ what it does and doesn't collect. The short version, verifiable in
 - It records the **name** of the frontmost application (e.g. "Chrome",
   "Excel") — never window titles, URLs, keystrokes, screenshots, or content.
   It never records itself.
-- Activity is sent to the S&S timesheet **only while you are clocked in**.
-  Off-the-clock activity never leaves your machine, and you can exclude any
-  app from tracking entirely (⊘ button).
+- The tracker runs **only while you are clocked in**. Off the clock, nothing
+  is observed or recorded at all — not locally, not on the server. The punch
+  clock is the on/off switch for all tracking, and you can exclude any app
+  entirely (⊘ button).
 - Quitting the app (footer button or right-click the menu bar icon → Quit)
   stops all tracking on that machine immediately.
 
@@ -24,13 +25,12 @@ what it does and doesn't collect. The short version, verifiable in
   clock in / break / resume / clock out and client attribution. Speaks the
   exact same `/api/store` punch protocol as the web app, so the header pill,
   Time page, and billing views all stay in sync.
-- **Desktop-wide activity tracking** — samples the frontmost application every
-  30s (app **names only**, never window titles or content; idle-gated at 5
-  min). Everything shows in the popup's "Today on this Mac" view locally.
-- **Billed time syncs, personal time doesn't** — activity blocks post to the
-  S&S timesheet (`timeseg`, `c: "app:<name>"`) only for time you were clocked
-  in. Off-the-clock activity never leaves this machine. Per-app opt-out via
-  the ⊘ button on any row.
+- **Desktop-wide activity tracking, only while clocked in** — samples the
+  frontmost application every 30s (app **names only**, never window titles or
+  content; idle-gated at 5 min). Clocked out = the tracker is off entirely.
+  Recorded blocks show in the popup's "Today on this Mac" view and post to
+  the S&S timesheet (`timeseg`, `c: "app:<name>"`). Per-app opt-out via the
+  ⊘ button on any row.
 - **Offline queue** — failed punches and segments persist to disk with real
   timestamps and replay in order on reconnect (server accepts `at` ≤36h back),
   same contract as the web app's `punch-pending-q`.

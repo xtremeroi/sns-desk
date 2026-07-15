@@ -3,7 +3,7 @@
 // browser flow: a login window completes Auth0 + Cloudflare Access once, and
 // the persisted CF_Authorization cookie (24h) authenticates API calls.
 
-const { app, Tray, BrowserWindow, ipcMain, nativeImage, powerMonitor, session, Notification, shell, Menu, dialog } = require("electron");
+const { app, Tray, BrowserWindow, ipcMain, nativeImage, powerMonitor, session, Notification, shell, Menu, dialog, screen } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const api = require("./lib/api");
@@ -57,15 +57,54 @@ function togglePopup() {
   if (!popup) return;
   if (popup.isVisible()) return popup.hide();
   // First open drops under the tray; after that the window opens wherever
-  // the user last moved/resized it (persisted in settings).
+  // the user last moved/resized it (persisted in settings), clamped so a
+  // stale saved position can never strand it off-screen.
   if (!readSettings().popupBounds) {
     const b = tray.getBounds();
     const { width } = popup.getBounds();
     popup.setPosition(Math.round(b.x + b.width / 2 - width / 2), Math.round(b.y + b.height + 4), false);
+  } else {
+    const b = popup.getBounds();
+    const wa = screen.getDisplayMatching(b).workArea;
+    popup.setBounds({
+      x: Math.min(Math.max(b.x, wa.x), wa.x + wa.width - b.width),
+      y: Math.min(Math.max(b.y, wa.y), wa.y + wa.height - Math.min(b.height, wa.height)),
+      width: b.width,
+      height: Math.min(b.height, wa.height),
+    });
   }
   popup.show();
   pushState();
 }
+
+// Manual header drag: CSS app-region hit-testing dies on transparent windows
+// after hide/show, so the renderer signals drag start/end and we move the
+// window with the cursor from here.
+let dragTimer = null;
+let dragOffset = null;
+function endDrag() {
+  if (!dragTimer) return;
+  clearInterval(dragTimer);
+  dragTimer = null;
+  dragOffset = null;
+  if (popup && !popup.isDestroyed()) {
+    const s = readSettings();
+    s.popupBounds = popup.getBounds();
+    writeSettings(s);
+  }
+}
+ipcMain.handle("drag-start", () => {
+  if (!popup || popup.isDestroyed() || !popup.isVisible()) return;
+  const pt = screen.getCursorScreenPoint();
+  const [wx, wy] = popup.getPosition();
+  dragOffset = { x: pt.x - wx, y: pt.y - wy };
+  clearInterval(dragTimer);
+  dragTimer = setInterval(() => {
+    const p = screen.getCursorScreenPoint();
+    popup.setPosition(p.x - dragOffset.x, p.y - dragOffset.y);
+  }, 16);
+});
+ipcMain.handle("drag-end", () => endDrag());
 
 // ── Windows ─────────────────────────────────────────────────────────────────
 function createPopup() {

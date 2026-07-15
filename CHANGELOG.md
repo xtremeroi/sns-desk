@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.8 — 2026-07-15
+
+- **Fix: window dragging no longer dies after closing and reopening the
+  panel** (0.1.7 could leave the window stranded wherever it was last
+  dragged). Dragging is now handled by the app itself instead of the CSS
+  drag region, which breaks on transparent windows after hide/show.
+- **Off-screen protection:** if a remembered position would open the panel
+  outside the visible screen, it snaps back into view.
+- **Tracking only while clocked in:** the activity tracker now runs solely
+  between clock-in and clock-out. Off the clock, S&S Desk observes and records
+  nothing — not even to the local "Today on this Mac" view. The punch clock is
+  the on/off switch for all tracking.
+
 ## 0.1.7 — 2026-07-15
 
 - **Floating panel:** the popup is now a real window — drag it anywhere by its

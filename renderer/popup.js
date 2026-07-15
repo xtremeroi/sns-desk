@@ -236,6 +236,15 @@ $("note").addEventListener("keydown", (e) => {
   }
 });
 
+// Manual window drag: mousedown on the header (not its buttons) starts it,
+// mouseup anywhere ends it. The main process moves the window with the cursor.
+document.querySelector(".hdr").addEventListener("mousedown", (e) => {
+  if (e.button !== 0 || e.target.closest("button")) return;
+  sns.dragStart();
+});
+window.addEventListener("mouseup", () => sns.dragEnd());
+window.addEventListener("blur", () => sns.dragEnd());
+
 $("refresh").onclick = () => sns.refresh();
 $("close").onclick = () => sns.hidePopup();
 $("quit").onclick = () => sns.quit();

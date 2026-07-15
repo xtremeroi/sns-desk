@@ -18,10 +18,11 @@
   html, body { background: transparent; height: 100%; }
   body { color: var(--text); font-size: 13px; padding: 10px; }
   .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; height: 100%; }
-  /* The header doubles as the drag handle for moving the window. */
-  .hdr { display: flex; align-items: center; gap: 8px; -webkit-app-region: drag; }
+  /* The header is the drag handle — manual drag via IPC, because CSS
+     app-region hit-testing dies on transparent windows after hide/show. */
+  .hdr { display: flex; align-items: center; gap: 8px; cursor: grab; user-select: none; }
+  .hdr:active { cursor: grabbing; }
   .hdr .mark { flex: 0 0 auto; }
-  .hdr .iconbtn { -webkit-app-region: no-drag; }
   .hdr .logo { font-weight: 700; letter-spacing: .3px; }
   .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; }
   .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -107,7 +108,7 @@
     <div class="muted-note" id="mutednote" style="display:none"></div>
   </div>
   <div class="ftr">
-    <span class="muted-note">app names only · billed time syncs while clocked in</span>
+    <span class="muted-note">app names only · recorded only while clocked in</span>
     <span class="spacer"></span>
     <button class="ftrbtn" id="timepage" title="Open the S&S Time page" aria-label="Open the S&S Time page">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
