@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.12 — 2026-07-15
+
+- **The sync button talks back:** it spins while forcing a server sync and
+  queue drain, then shows a verdict — green "up to date", or amber
+  "sign in needed" / "offline · N queued" / "sync failed" — so a healthy
+  click is distinguishable from a dead button.
+
 ## 0.1.11 — 2026-07-15
 
 - **Double-click the header to collapse into a mini timer:** just the day

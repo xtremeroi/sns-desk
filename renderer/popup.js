@@ -252,7 +252,30 @@ document.querySelector(".hdr").addEventListener("dblclick", (e) => {
 window.addEventListener("mouseup", () => sns.dragEnd());
 window.addEventListener("blur", () => sns.dragEnd());
 
-$("refresh").onclick = () => sns.refresh();
+// Sync button: spin while forcing a server sync + queue drain, then show a
+// short verdict so a healthy no-op click still visibly did something.
+let syncMsgTimer = null;
+$("refresh").onclick = async () => {
+  const btn = $("refresh");
+  if (btn.classList.contains("spin")) return;
+  btn.classList.add("spin");
+  const msg = $("syncmsg");
+  msg.textContent = "";
+  const started = Date.now();
+  let res = null;
+  try { res = await sns.refresh(); } catch { /* verdict below */ }
+  // Let the spin be perceivable even when the sync is instant.
+  await new Promise((r) => setTimeout(r, Math.max(0, 500 - (Date.now() - started))));
+  btn.classList.remove("spin");
+  const text = !res ? "sync failed"
+    : res.needsLogin ? "sign in needed"
+    : res.pending ? `offline · ${res.pending} queued`
+    : "up to date";
+  msg.textContent = text;
+  msg.classList.toggle("warn", !res || !!res.needsLogin || !!res.pending);
+  clearTimeout(syncMsgTimer);
+  syncMsgTimer = setTimeout(() => { msg.textContent = ""; }, 2500);
+};
 $("pin").onclick = () => sns.togglePin();
 $("close").onclick = () => sns.hidePopup();
 $("quit").onclick = () => sns.quit();

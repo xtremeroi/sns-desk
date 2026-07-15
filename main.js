@@ -376,7 +376,15 @@ ipcMain.handle("punch", async (_e, action, opts) => {
   pushState();
   return res;
 });
-ipcMain.handle("refresh", async () => { await syncGlobal(); await drainAll(); });
+ipcMain.handle("refresh", async () => {
+  await syncGlobal();
+  await drainAll();
+  // Report the outcome so the sync button can show a verdict.
+  return {
+    needsLogin: needsLogin || punch.needsLogin,
+    pending: punch.pendingCount() + tracker.pendingCount(),
+  };
+});
 ipcMain.handle("login", () => openLogin());
 ipcMain.handle("open-time-page", () => shell.openExternal(`${api.BASE}/#v=time`));
 ipcMain.handle("set-exclude", (_e, apps) => {
