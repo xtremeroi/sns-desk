@@ -47,9 +47,10 @@ function updateTray() {
   const pend = punch.pendingCount() + tracker.pendingCount();
   const flag = pend ? " ⇡" : needsLogin || punch.needsLogin ? " ⚠" : "";
   // Tray shows the DAY total, so a client switch never resets the ticker.
+  // Clocked out = mark only (no wordmark text), plus any status glyph.
   if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(punch.workedMsToday())}${flag}`);
   else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(punch.workedMsToday())}${flag}`);
-  else tray.setTitle(`S&S${flag}`);
+  else tray.setTitle(flag.trim());
 }
 
 function togglePopup() {
