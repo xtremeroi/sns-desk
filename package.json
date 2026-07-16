@@ -8,7 +8,8 @@
   "author": "XTREME ROI",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac dmg --universal"
+    "dist": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac dmg --universal",
+    "dist:release": "electron-builder --mac dmg --universal -c.mac.notarize.teamId=$APPLE_TEAM_ID"
   },
   "devDependencies": {
     "electron": "^31.7.7",
@@ -30,7 +31,10 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
-      "identity": null,
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "extendInfo": {
         "LSUIElement": 1
       }
