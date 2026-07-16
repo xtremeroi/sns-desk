@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.13 — 2026-07-15
+
+- **Time-off decision notifications:** when a manager approves or denies your
+  PTO on the S&S Time page, Desk fires a native macOS notification within a
+  minute ("Your PTO for Aug 3 was approved"). Clicking it opens the Time page.
+  No more checking the site to find out. Sick time (auto-recorded) never
+  notifies, and pre-existing decisions don't fire on first launch.
+
 ## 0.1.12 — 2026-07-15
 
 - **The sync button talks back:** it spins while forcing a server sync and

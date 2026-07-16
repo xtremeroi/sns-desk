@@ -9,6 +9,7 @@ const fs = require("fs");
 const api = require("./lib/api");
 const { Tracker } = require("./lib/tracker");
 const { Punch } = require("./lib/punch");
+const { LeaveWatch } = require("./lib/leave");
 
 // Google blocks sign-in inside webviews that identify as Electron, and a
 // Chrome UA fails its client-hints cross-check ("this browser or app may not
@@ -22,6 +23,7 @@ let popup = null;
 let loginWin = null;
 let punch = null;
 let tracker = null;
+let leaveWatch = null;
 let globalState = { actor: null, isTeam: false, roster: [], punchLockMin: 45, timeIdleMin: 10 };
 let needsLogin = false;
 let lockedAt = null;
@@ -193,6 +195,7 @@ function onAuthed(body) {
     timeIdleMin: body.timeIdleMin ?? 10,
   };
   punch.sync().then(() => drainAll());
+  if (leaveWatch) leaveWatch.poll();
   pushState();
 }
 
@@ -261,6 +264,13 @@ app.whenReady().then(() => {
   }
 
   punch = new Punch(app.getPath("userData"), () => updateTray());
+  // Notify the employee when a manager approves or denies their PTO. Clicking
+  // the notification opens the Time page.
+  leaveWatch = new LeaveWatch(app.getPath("userData"), (title, body) => {
+    const n = new Notification({ title, body });
+    n.on("click", () => shell.openExternal(`${api.BASE}/#v=time`));
+    n.show();
+  });
   tracker = new Tracker({
     userData: app.getPath("userData"),
     getIdleSeconds: () => powerMonitor.getSystemIdleTime(),
@@ -311,7 +321,7 @@ app.whenReady().then(() => {
     console.log("[sns-desk] cookies for", api.BASE, cookies.map((c) => `${c.name} exp=${c.expirationDate} session=${c.session}`));
     syncGlobal();
   });
-  setInterval(() => { syncGlobal(); }, 60_000); // onAuthed chains punch.sync + drain
+  setInterval(() => { syncGlobal(); }, 60_000); // onAuthed chains punch.sync + drain + leaveWatch
   setInterval(() => { drainAll(); }, 60_000);
   setInterval(() => { updateTray(); }, 1_000);
   setInterval(() => { pushState(); }, 15_000);
