@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.18 — 2026-07-16
+
+- **Syncs the final clock action before quitting.** Clocking out and quitting
+  immediately could kill the sync mid-flight, leaving your session open (and
+  still counting time) on your phone or the web until Desk next launched.
+  Quitting now waits for the last clock action to reach S&S first — bounded so a
+  dropped connection can't hang the quit, with the existing replay-on-relaunch
+  as the backstop.
+- **Update check now confirms in the panel.** Clicking the version number (or
+  the tray "Check for Updates…") shows the result right in the popup header —
+  "checking…", then "software is up to date", "downloading v…", or "ready to
+  restart". Previously the only feedback was a macOS notification, so with
+  notifications muted the click looked like it did nothing.
+
 ## 0.1.17 — 2026-07-16
 
 - **Projects.** When you pick a client that has projects defined in S&S, a

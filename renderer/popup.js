@@ -319,7 +319,19 @@ $("refresh").onclick = async () => {
   clearTimeout(syncMsgTimer);
   syncMsgTimer = setTimeout(() => { msg.textContent = ""; }, 2500);
 };
-$("ver").onclick = () => sns.checkUpdate();
+// Version badge = manual update check. The verdict lands in the header msg line
+// (main pushes update-status), so the click always visibly resolves even if
+// macOS notifications are muted. Show an instant "checking…" so it never feels dead.
+let updMsgTimer = null;
+function showUpdMsg(text, warn, persist) {
+  const msg = $("syncmsg");
+  msg.textContent = text;
+  msg.classList.toggle("warn", !!warn);
+  clearTimeout(updMsgTimer);
+  if (!persist) updMsgTimer = setTimeout(() => { msg.textContent = ""; msg.classList.remove("warn"); }, 3000);
+}
+$("ver").onclick = () => { showUpdMsg("checking…", false, true); sns.checkUpdate(); };
+sns.onUpdateStatus((d) => showUpdMsg(d.text, d.tone === "warn", d.persist));
 $("pin").onclick = () => sns.togglePin();
 $("close").onclick = () => sns.hidePopup();
 $("quit").onclick = () => sns.quit();

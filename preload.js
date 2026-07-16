@@ -14,4 +14,5 @@ contextBridge.exposeInMainWorld("sns", {
   dragEnd: () => ipcRenderer.invoke("drag-end"),
   quit: () => ipcRenderer.invoke("quit"),
   onState: (fn) => ipcRenderer.on("state", (_e, s) => fn(s)),
+  onUpdateStatus: (fn) => ipcRenderer.on("update-status", (_e, d) => fn(d)),
 });

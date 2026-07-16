@@ -31,13 +31,22 @@ let lockedAt = null;
 let updateReady = null; // version string once an update is downloaded and staged
 let manualUpdateCheck = false; // true while a user-triggered "check now" is in flight
 
+// Push a short verdict into the popup header (next to the version badge) so a
+// manual check always visibly resolves, even when macOS notifications are
+// muted/denied. tone: "ok" (green) | "warn" (amber). persist keeps it until the
+// next push (used for "restart to update").
+function sendUpdateStatus(text, tone = "ok", persist = false) {
+  if (popup && !popup.isDestroyed()) popup.webContents.send("update-status", { text, tone, persist });
+}
+
 // User-triggered update check (tray menu / version badge). Gives feedback the
 // silent background check doesn't: "up to date", "downloading", or an error.
 function checkForUpdatesNow() {
-  if (!app.isPackaged) { new Notification({ title: "S&S Desk", body: "Update checks run only in the installed app." }).show(); return; }
-  if (updateReady) { new Notification({ title: "Update ready", body: `Version ${updateReady} is downloaded — right-click the menu bar icon and choose Restart to update.` }).show(); return; }
+  if (!app.isPackaged) { sendUpdateStatus("dev build — no updates", "warn"); return; }
+  if (updateReady) { sendUpdateStatus(`v${updateReady} ready — restart`, "warn", true); return; }
   manualUpdateCheck = true;
-  autoUpdater.checkForUpdates().catch(() => { manualUpdateCheck = false; });
+  sendUpdateStatus("checking…", "ok");
+  autoUpdater.checkForUpdates().catch(() => { manualUpdateCheck = false; sendUpdateStatus("check failed", "warn"); });
 }
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
@@ -252,6 +261,24 @@ async function drainAll() {
   pushState();
 }
 
+// Guarantee the last clock action reaches the server before the process dies:
+// a quick "clock out → quit" can otherwise kill an in-flight punch, leaving the
+// session open (and ticking) on the phone/web until Desk relaunches and replays.
+// Bounded so a dead network can't hang quit — the timestamped queue still
+// self-heals on next launch.
+async function flushBeforeQuit(maxMs = 4000) {
+  let timer;
+  const work = (async () => {
+    await punch.settle();   // finish the just-clicked action, if any
+    await drainAll();       // deliver anything that had queued
+  })();
+  await Promise.race([
+    work.catch(() => {}),
+    new Promise((r) => { timer = setTimeout(r, maxMs); }),
+  ]);
+  clearTimeout(timer);
+}
+
 // ── App lifecycle ───────────────────────────────────────────────────────────
 // Stable data location for dev (`electron .` would otherwise use "Electron")
 // and packaged builds alike.
@@ -343,10 +370,16 @@ app.whenReady().then(() => {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.on("update-available", (info) => {
-      if (manualUpdateCheck) new Notification({ title: "Update available", body: `Downloading S&S Desk ${info.version}…` }).show();
+      if (manualUpdateCheck) {
+        new Notification({ title: "Update available", body: `Downloading S&S Desk ${info.version}…` }).show();
+        sendUpdateStatus(`downloading v${info.version}…`, "ok");
+      }
     });
     autoUpdater.on("update-not-available", () => {
-      if (manualUpdateCheck) new Notification({ title: "S&S Desk is up to date", body: `You're on the latest version (${app.getVersion()}).` }).show();
+      if (manualUpdateCheck) {
+        new Notification({ title: "S&S Desk is up to date", body: `You're on the latest version (${app.getVersion()}).` }).show();
+        sendUpdateStatus("software is up to date", "ok");
+      }
       manualUpdateCheck = false;
     });
     autoUpdater.on("update-downloaded", (info) => {
@@ -356,11 +389,15 @@ app.whenReady().then(() => {
         title: "S&S Desk update ready",
         body: `Version ${info.version} installs the next time you quit — or right-click the menu bar icon and choose Restart to update.`,
       }).show();
+      sendUpdateStatus(`v${info.version} ready — restart`, "warn", true);
       manualUpdateCheck = false;
     });
     autoUpdater.on("error", (e) => {
       console.log("[updater] error:", e && e.message ? e.message : e);
-      if (manualUpdateCheck) new Notification({ title: "Update check failed", body: "Couldn't reach the update server — try again in a bit." }).show();
+      if (manualUpdateCheck) {
+        new Notification({ title: "Update check failed", body: "Couldn't reach the update server — try again in a bit." }).show();
+        sendUpdateStatus("check failed", "warn");
+      }
       manualUpdateCheck = false;
     });
     const check = () => autoUpdater.checkForUpdates().catch(() => {});
@@ -431,6 +468,10 @@ async function quitFlow() {
     if (response === 0) await punch.act("out").catch(() => {});
   }
   tracker.stop();
+  // Best-effort visible cue in the panel while we make sure the server has the
+  // final state (does nothing if the panel is hidden).
+  sendUpdateStatus("syncing…", "ok", true);
+  await flushBeforeQuit();
   app.quit();
 }
 
