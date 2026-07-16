@@ -23,6 +23,30 @@ function selectedClient() {
   if (!opt || !opt.value) return null;
   return { id: opt.value, n: opt.dataset.n };
 }
+function selectedProject() {
+  return $("project").value || null;
+}
+// Fill the project dropdown from the selected client's registry. Hidden when
+// the client (or General) has no projects defined. keepValue preserves the
+// current selection across a re-render.
+function populateProjects(clientId, keepValue) {
+  const psel = $("project");
+  const prev = keepValue ? psel.value : "";
+  const projects = (clientId && state.clientProjects) ? (state.clientProjects[clientId] ?? []) : [];
+  psel.innerHTML = "";
+  const none = document.createElement("option");
+  none.value = "";
+  none.textContent = "No project";
+  psel.appendChild(none);
+  for (const name of projects) {
+    const o = document.createElement("option");
+    o.value = name;
+    o.textContent = name;
+    psel.appendChild(o);
+  }
+  psel.style.display = projects.length ? "" : "none";
+  if (prev && projects.includes(prev)) psel.value = prev;
+}
 
 function render() {
   if (!state) return;
@@ -51,6 +75,10 @@ function render() {
   }
   if (p.status !== "out" && p.client) sel.value = p.client.id;
   else if (cur) sel.value = cur;
+
+  // Project select follows the chosen client; reflects the open session's project.
+  populateProjects(sel.value, true);
+  if (p.status !== "out") $("project").value = p.project ?? "";
 
   // Ticker (DAY total — continuous across client switches) + session subline.
   const t = $("ticker");
@@ -82,7 +110,7 @@ function render() {
   };
   if (p.status === "out") {
     mk("Clock in", "primary", () => {
-      act("in", { client: selectedClient(), note: $("note").value.trim() || undefined });
+      act("in", { client: selectedClient(), project: selectedProject() || undefined, note: $("note").value.trim() || undefined });
       $("note").value = "";
     });
   } else {
@@ -195,6 +223,7 @@ function renderSub(todayMs, sessionMs) {
     (p.status === "break" ? "On break · " : "") +
     `Session ${fmtHMS(sessionMs)} · ` +
     (p.client ? p.client.n : "General") +
+    (p.project ? ` / ${p.project}` : "") +
     (p.note ? ` — ${p.note}` : "");
   $("sub").style.color = unsynced ? "var(--amber)" : "";
 }
@@ -207,19 +236,33 @@ setInterval(() => {
   renderSub(tickBase.todayMs + d, tickBase.sessionMs + d);
 }, 1000);
 
-// Client switch while clocked in → split the running segment server-side,
-// then ask what this new segment is about (every switch, fresh note).
-$("client").addEventListener("change", () => {
-  if (!state || state.punch.status === "out") return;
-  const c = selectedClient();
-  if (c) act("switch", { client: c });
-  else if (state.punch.client) act("switch", { general: true }); // client → General splits too
-  else return; // General → General: nothing changed
+function promptNote() {
   noteAsk = true;
   const n = $("note");
   n.value = "";
   n.style.display = "";
   n.focus();
+}
+
+// Client switch while clocked in → split the running segment server-side,
+// then ask what this new segment is about (every switch, fresh note).
+$("client").addEventListener("change", () => {
+  populateProjects(selectedClient()?.id ?? "", false); // new client → fresh project list, reset selection
+  if (!state || state.punch.status === "out") return;
+  const c = selectedClient();
+  if (c) act("switch", { client: c, project: selectedProject() || undefined });
+  else if (state.punch.client) act("switch", { general: true }); // client → General splits too
+  else return; // General → General: nothing changed
+  promptNote();
+});
+
+// Project switch while clocked in → split too (projects are billing buckets).
+$("project").addEventListener("change", () => {
+  if (!state || state.punch.status === "out") return; // clocked out: applied on clock-in
+  const c = selectedClient();
+  if (!c) return; // General has no projects
+  act("switch", { client: c, project: selectedProject() || undefined });
+  promptNote();
 });
 
 // While clocked in, the note field attaches to the open segment.
@@ -276,6 +319,7 @@ $("refresh").onclick = async () => {
   clearTimeout(syncMsgTimer);
   syncMsgTimer = setTimeout(() => { msg.textContent = ""; }, 2500);
 };
+$("ver").onclick = () => sns.checkUpdate();
 $("pin").onclick = () => sns.togglePin();
 $("close").onclick = () => sns.hidePopup();
 $("quit").onclick = () => sns.quit();

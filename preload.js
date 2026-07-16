@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("sns", {
   openTimePage: () => ipcRenderer.invoke("open-time-page"),
   setExclude: (apps) => ipcRenderer.invoke("set-exclude", apps),
   hidePopup: () => ipcRenderer.invoke("hide-popup"),
+  checkUpdate: () => ipcRenderer.invoke("check-update"),
   togglePin: () => ipcRenderer.invoke("toggle-pin"),
   toggleMini: () => ipcRenderer.invoke("toggle-mini"),
   dragStart: () => ipcRenderer.invoke("drag-start"),

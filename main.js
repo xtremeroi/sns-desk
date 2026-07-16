@@ -25,10 +25,20 @@ let loginWin = null;
 let punch = null;
 let tracker = null;
 let leaveWatch = null;
-let globalState = { actor: null, isTeam: false, roster: [], punchLockMin: 45, timeIdleMin: 10 };
+let globalState = { actor: null, isTeam: false, roster: [], clientProjects: {}, punchLockMin: 45, timeIdleMin: 10 };
 let needsLogin = false;
 let lockedAt = null;
 let updateReady = null; // version string once an update is downloaded and staged
+let manualUpdateCheck = false; // true while a user-triggered "check now" is in flight
+
+// User-triggered update check (tray menu / version badge). Gives feedback the
+// silent background check doesn't: "up to date", "downloading", or an error.
+function checkForUpdatesNow() {
+  if (!app.isPackaged) { new Notification({ title: "S&S Desk", body: "Update checks run only in the installed app." }).show(); return; }
+  if (updateReady) { new Notification({ title: "Update ready", body: `Version ${updateReady} is downloaded — right-click the menu bar icon and choose Restart to update.` }).show(); return; }
+  manualUpdateCheck = true;
+  autoUpdater.checkForUpdates().catch(() => { manualUpdateCheck = false; });
+}
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 function readSettings() {
@@ -198,6 +208,9 @@ function onAuthed(body) {
   };
   punch.sync().then(() => drainAll());
   if (leaveWatch) leaveWatch.poll();
+  // Per-client project registry (managers define it in S&S) — powers the
+  // project picker. Refreshed on each auth so new projects appear live.
+  api.getClientProjects().then((r) => { if (r.ok) { globalState.clientProjects = r.body.projects ?? {}; pushState(); } });
   pushState();
 }
 
@@ -212,6 +225,7 @@ function pushState() {
     needsLogin: needsLogin || punch.needsLogin,
     actor: globalState.actor,
     roster: globalState.roster,
+    clientProjects: globalState.clientProjects,
     punch: punch.state(),
     workedMsToday: punch.workedMsToday(),
     sessionMs: punch.sessionMs(),
@@ -291,7 +305,9 @@ app.whenReady().then(() => {
       { label: "Open S&S Desk", click: () => { if (!popup.isVisible()) togglePopup(); } },
       // Restarting for an update keeps the punch session running (it lives on
       // the server) — no clock-out prompt, unlike a normal Quit.
-      ...(updateReady ? [{ label: `Restart to update to ${updateReady}`, click: () => { tracker.stop(); autoUpdater.quitAndInstall(); } }] : []),
+      ...(updateReady
+        ? [{ label: `Restart to update to ${updateReady}`, click: () => { tracker.stop(); autoUpdater.quitAndInstall(); } }]
+        : [{ label: "Check for Updates…", enabled: app.isPackaged, click: () => checkForUpdatesNow() }]),
       {
         label: "Launch at Login",
         type: "checkbox",
@@ -326,6 +342,13 @@ app.whenReady().then(() => {
   if (app.isPackaged) {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.on("update-available", (info) => {
+      if (manualUpdateCheck) new Notification({ title: "Update available", body: `Downloading S&S Desk ${info.version}…` }).show();
+    });
+    autoUpdater.on("update-not-available", () => {
+      if (manualUpdateCheck) new Notification({ title: "S&S Desk is up to date", body: `You're on the latest version (${app.getVersion()}).` }).show();
+      manualUpdateCheck = false;
+    });
     autoUpdater.on("update-downloaded", (info) => {
       updateReady = info.version;
       updateTray();
@@ -333,8 +356,13 @@ app.whenReady().then(() => {
         title: "S&S Desk update ready",
         body: `Version ${info.version} installs the next time you quit — or right-click the menu bar icon and choose Restart to update.`,
       }).show();
+      manualUpdateCheck = false;
     });
-    autoUpdater.on("error", (e) => console.log("[updater] error:", e && e.message ? e.message : e));
+    autoUpdater.on("error", (e) => {
+      console.log("[updater] error:", e && e.message ? e.message : e);
+      if (manualUpdateCheck) new Notification({ title: "Update check failed", body: "Couldn't reach the update server — try again in a bit." }).show();
+      manualUpdateCheck = false;
+    });
     const check = () => autoUpdater.checkForUpdates().catch(() => {});
     check();
     setInterval(check, 6 * 3600_000);
@@ -430,6 +458,7 @@ ipcMain.handle("set-exclude", (_e, apps) => {
   pushState();
 });
 ipcMain.handle("hide-popup", () => { if (popup && !popup.isDestroyed()) popup.hide(); });
+ipcMain.handle("check-update", () => checkForUpdatesNow());
 // Double-clicking the header collapses the panel into a mini timer (day
 // ticker + session line) and back to the previous height.
 const MINI_HEIGHT = 172;

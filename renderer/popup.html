@@ -26,7 +26,8 @@
   .hdr:active { cursor: grabbing; }
   .hdr .mark { flex: 0 0 auto; }
   .hdr .logo { font-weight: 700; letter-spacing: .3px; }
-  .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; }
+  .hdr .ver { color: var(--dim); font-size: 10px; font-family: ui-monospace, monospace; opacity: .8; cursor: pointer; }
+  .hdr .ver:hover { color: var(--text); opacity: 1; text-decoration: underline; }
   .hdr .who { color: var(--dim); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .iconbtn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
   .iconbtn:hover { color: var(--text); background: var(--card); }
@@ -100,7 +101,7 @@
       <rect x="0" y="76" width="90" height="13" rx="6.5" fill="#e9ebf2"/>
     </svg>
     <span class="logo">S&amp;S Desk</span>
-    <span class="ver" id="ver" title="App version"></span>
+    <span class="ver" id="ver" title="Click to check for updates"></span>
     <span class="who" id="who"></span>
     <span class="syncmsg" id="syncmsg"></span>
     <button class="iconbtn" id="pin" title="Pin on top of other windows">
@@ -117,6 +118,7 @@
     <div class="ticker out" id="ticker">Clocked out</div>
     <div class="sub" id="sub"></div>
     <select id="client"></select>
+    <select id="project" style="display:none"></select>
     <input type="text" id="note" placeholder="What are you working on? (optional)" maxlength="80" />
     <div class="row" id="actions"></div>
     <div class="pendbadge" id="pend" style="display:none"></div>

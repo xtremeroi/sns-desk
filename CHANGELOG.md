@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.17 — 2026-07-16
+
+- **Projects.** When you pick a client that has projects defined in S&S, a
+  project dropdown appears — attribute your time to a specific project under
+  that client. Switching project splits the billing segment (like switching
+  client) and asks for a fresh note. Projects sync live from S&S; managers
+  define them per client on the Time page.
+- **Force an update.** Don't want to wait for the automatic check? Right-click
+  the menu bar icon → "Check for Updates…", or click the version number in the
+  popup header. You'll get a notification whether it's up to date, downloading,
+  or ready to restart.
+
 ## 0.1.16 — 2026-07-16
 
 - **Auto-update.** S&S Desk now updates itself from GitHub Releases. New
