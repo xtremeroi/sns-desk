@@ -10,6 +10,7 @@ const api = require("./lib/api");
 const { Tracker } = require("./lib/tracker");
 const { Punch } = require("./lib/punch");
 const { LeaveWatch } = require("./lib/leave");
+const { autoUpdater } = require("electron-updater");
 
 // Google blocks sign-in inside webviews that identify as Electron, and a
 // Chrome UA fails its client-hints cross-check ("this browser or app may not
@@ -27,6 +28,7 @@ let leaveWatch = null;
 let globalState = { actor: null, isTeam: false, roster: [], punchLockMin: 45, timeIdleMin: 10 };
 let needsLogin = false;
 let lockedAt = null;
+let updateReady = null; // version string once an update is downloaded and staged
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 function readSettings() {
@@ -287,6 +289,9 @@ app.whenReady().then(() => {
   tray.on("right-click", () => {
     tray.popUpContextMenu(Menu.buildFromTemplate([
       { label: "Open S&S Desk", click: () => { if (!popup.isVisible()) togglePopup(); } },
+      // Restarting for an update keeps the punch session running (it lives on
+      // the server) — no clock-out prompt, unlike a normal Quit.
+      ...(updateReady ? [{ label: `Restart to update to ${updateReady}`, click: () => { tracker.stop(); autoUpdater.quitAndInstall(); } }] : []),
       {
         label: "Launch at Login",
         type: "checkbox",
@@ -313,6 +318,27 @@ app.whenReady().then(() => {
   }
 
   tracker.start();
+
+  // Auto-update from GitHub Releases (packaged builds only; needs the Developer
+  // ID signature Squirrel validates). Non-disruptive: download in the
+  // background and apply on the NEXT quit — never yank the app out from under a
+  // running shift. The tray menu offers an explicit "Restart to update" too.
+  if (app.isPackaged) {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.on("update-downloaded", (info) => {
+      updateReady = info.version;
+      updateTray();
+      new Notification({
+        title: "S&S Desk update ready",
+        body: `Version ${info.version} installs the next time you quit — or right-click the menu bar icon and choose Restart to update.`,
+      }).show();
+    });
+    autoUpdater.on("error", (e) => console.log("[updater] error:", e && e.message ? e.message : e));
+    const check = () => autoUpdater.checkForUpdates().catch(() => {});
+    check();
+    setInterval(check, 6 * 3600_000);
+  }
   // The persisted cookie store loads asynchronously; a fetch fired straight
   // from whenReady races it and sees no CF_Authorization (spurious ⚠ at every
   // launch). cookies.get queues on the store, so awaiting it first guarantees

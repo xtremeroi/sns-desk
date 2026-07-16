@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.16 — 2026-07-16
+
+- **Auto-update.** S&S Desk now updates itself from GitHub Releases. New
+  versions download quietly in the background and apply the next time you
+  quit — or right-click the menu bar icon and choose "Restart to update."
+  Restarting for an update keeps you clocked in. **This is the last version
+  anyone installs by hand;** everything after updates automatically.
+
 ## 0.1.15 — 2026-07-15
 
 - **Signed and notarized.** Builds are now code-signed with XTREME ROI's Apple
