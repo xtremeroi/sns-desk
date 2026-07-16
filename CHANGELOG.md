@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.15 — 2026-07-15
+
+- **Signed and notarized.** Builds are now code-signed with XTREME ROI's Apple
+  Developer ID and notarized by Apple, so the app opens on any Mac with no
+  Gatekeeper warning — no more right-click-Open or Privacy & Security override.
+
 ## 0.1.14 — 2026-07-15
 
 - **The ⚠ badge no longer cries wolf.** "Sign in needed" now shows only for a
