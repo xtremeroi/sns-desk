@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.14 — 2026-07-15
+
+- **The ⚠ badge no longer cries wolf.** "Sign in needed" now shows only for a
+  genuine expired session (the Access login redirect). A transient Cloudflare
+  or edge hiccup (a brief 5xx / non-JSON response) is treated as a temporary
+  failure that retries and shows "offline · pending" instead of a false
+  sign-in prompt.
+
 ## 0.1.13 — 2026-07-15
 
 - **Time-off decision notifications:** when a manager approves or denies your
