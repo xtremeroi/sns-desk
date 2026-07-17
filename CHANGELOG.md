@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.19 — 2026-07-16
+
+- **Desktop widgets.** S&S Desk now ships native macOS widgets you can add to your
+  desktop (right-click → Edit Widgets → S&S Desk). Three tiles: **Today** (time
+  worked today + clock status), **Current Session** (what you're on right now,
+  counting up live), and **Today by Client** (the billing split). They read live
+  from Desk, so keep it running and clocked in. The logo mark in the corner turns
+  green / amber / red with your clock state, matching the menu-bar icon.
+
 ## 0.1.18 — 2026-07-16
 
 - **Syncs the final clock action before quitting.** Clocking out and quitting

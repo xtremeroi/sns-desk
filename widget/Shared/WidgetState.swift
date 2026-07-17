@@ -1,0 +1,64 @@
+import Foundation
+
+// Mirror of the JSON that S&S Desk writes into the App Group container
+// (see lib/widget-bridge.js). Decoding is tolerant: a missing/garbage file
+// yields nil and the widget falls back to `.placeholder`.
+struct ClientSlice: Codable, Hashable {
+    let n: String
+    let ms: Double
+    let live: Bool
+}
+
+struct WidgetState: Codable {
+    let status: String            // "out" | "in" | "break"
+    let workedMsToday: Double
+    let sessionMs: Double
+    let sessionRefMs: Double?     // epoch ms anchor for a live session .timer
+    let todayRefMs: Double?       // epoch ms anchor for a live day-total .timer
+    let client: String
+    let project: String?
+    let note: String?
+    let clients: [ClientSlice]
+    let actor: String?
+    let pending: Int
+    let needsLogin: Bool
+    let updatedMs: Double
+
+    static let appGroup = "group.com.xtremeroi.snsdesk"
+
+    /// Read the snapshot from the shared App Group container.
+    static func load() -> WidgetState? {
+        guard let dir = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: appGroup) else { return nil }
+        let url = dir.appendingPathComponent("widget-state.json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(WidgetState.self, from: data)
+    }
+
+    var isLive: Bool { status == "in" }
+    var isStale: Bool { pending > 0 || needsLogin }
+
+    /// Anchor dates for the live count-up displays (nil unless clocked in).
+    var sessionStart: Date? { sessionRefMs.map { Date(timeIntervalSince1970: $0 / 1000) } }
+    var todayStart: Date? { todayRefMs.map { Date(timeIntervalSince1970: $0 / 1000) } }
+
+    static let placeholder = WidgetState(
+        status: "out", workedMsToday: 0, sessionMs: 0,
+        sessionRefMs: nil, todayRefMs: nil,
+        client: "General", project: nil, note: nil,
+        clients: [], actor: nil, pending: 0, needsLogin: false, updatedMs: 0
+    )
+
+    // A representative filled state for Xcode's widget gallery preview.
+    static let sample = WidgetState(
+        status: "in", workedMsToday: 3 * 3600_000 + 12 * 60_000, sessionMs: 47 * 60_000,
+        sessionRefMs: nil, todayRefMs: nil,
+        client: "Cangshan Cutlery", project: "PDP Optimization", note: "A+ content pass",
+        clients: [
+            ClientSlice(n: "Cangshan Cutlery", ms: 96 * 60_000, live: true),
+            ClientSlice(n: "Simpletics", ms: 62 * 60_000, live: false),
+            ClientSlice(n: "TNGstore", ms: 34 * 60_000, live: false),
+        ],
+        actor: "You", pending: 0, needsLogin: false, updatedMs: 0
+    )
+}

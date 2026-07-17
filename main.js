@@ -10,6 +10,7 @@ const api = require("./lib/api");
 const { Tracker } = require("./lib/tracker");
 const { Punch } = require("./lib/punch");
 const { LeaveWatch } = require("./lib/leave");
+const widgetBridge = require("./lib/widget-bridge");
 const { autoUpdater } = require("electron-updater");
 
 // Google blocks sign-in inside webviews that identify as Electron, and a
@@ -224,8 +225,37 @@ function onAuthed(body) {
 }
 
 // ── State push to popup ─────────────────────────────────────────────────────
+// Snapshot for the native WidgetKit widgets. Written on every state change,
+// regardless of whether the panel is open (the widget must stay current even
+// when Desk is fully in the background). `*RefMs` are epoch anchors the widget
+// feeds to SwiftUI's .timer so the current session/day counts up live on-screen
+// without waking the extension; null when not clocked in (shows a static value).
+function writeWidgetState() {
+  const st = punch.state();
+  const now = Date.now();
+  const workedMs = punch.workedMsToday();
+  const sessionMs = punch.sessionMs();
+  const live = st.status === "in";
+  widgetBridge.write({
+    status: st.status,
+    workedMsToday: workedMs,
+    sessionMs,
+    sessionRefMs: live ? now - sessionMs : null,
+    todayRefMs: live ? now - workedMs : null,
+    client: st.client?.n ?? "General",
+    project: st.project ?? null,
+    note: st.note ?? null,
+    clients: punch.clientTotalsToday().map((c) => ({ n: c.n, ms: c.ms, live: !!c.live })),
+    actor: globalState.actor ?? null,
+    pending: punch.pendingCount() + tracker.pendingCount(),
+    needsLogin: needsLogin || punch.needsLogin,
+    updatedMs: now,
+  });
+}
+
 function pushState() {
   updateTray();
+  writeWidgetState();
   if (!popup || popup.isDestroyed() || !popup.isVisible()) return;
   const today = api.localDate();
   popup.webContents.send("state", {

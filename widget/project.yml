@@ -1,0 +1,56 @@
+# XcodeGen spec — generates SNSDeskWidgets.xcodeproj from source.
+#   brew install xcodegen && cd widget && xcodegen generate
+# Then open SNSDeskWidgets.xcodeproj in Xcode and Run the "SNSDeskWidgets" scheme.
+name: SNSDeskWidgets
+options:
+  bundleIdPrefix: com.xtremeroi.snsdesk
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: "29528WCWRA"
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  # Host app — carries the widget extension and must be launched once.
+  SNSDeskWidgets:
+    type: application
+    platform: macOS
+    sources:
+      - Host
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xtremeroi.snsdesk.widgets
+        PRODUCT_NAME: "S&S Desk Widgets"
+        CODE_SIGN_ENTITLEMENTS: Host/Host.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: NO
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© XTREME ROI"
+        ENABLE_HARDENED_RUNTIME: YES
+    dependencies:
+      - target: SNSDeskWidgetsExtension
+
+  # WidgetKit extension — the three tiles.
+  SNSDeskWidgetsExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - Widget
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xtremeroi.snsdesk.widgets.ext
+        PRODUCT_NAME: SNSDeskWidgetsExtension
+        INFOPLIST_FILE: Widget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widget/Widget.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework

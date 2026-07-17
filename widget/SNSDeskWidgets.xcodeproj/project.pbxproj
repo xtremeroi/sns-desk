@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1838CCA4B5DA7D428EFEEB9E /* WidgetState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D444641C4D3A1AAA893A611 /* WidgetState.swift */; };
+		1BB02C115FB226579214FE21 /* Style.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD926AA9FEB630980489798D /* Style.swift */; };
+		2ECDD1AFA0FF9D6A4E54BB37 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CA88637095E165075D5E261 /* SwiftUI.framework */; };
+		37174C103440BC17AFBA8256 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C32976586E1075E66263C0 /* WidgetViews.swift */; };
+		84C19E2BA69E21DFEB5837B9 /* SNSDeskWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7870A18C77FE4499842C12 /* SNSDeskWidgets.swift */; };
+		DCB7272A21BC44C4DE73318B /* Style.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD926AA9FEB630980489798D /* Style.swift */; };
+		E792F01B04F47A2B6239EA08 /* SNSDeskWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 076CE0BA4C135B7CD8A526F3 /* SNSDeskWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F1B8958664D274EF73A966FA /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C2AFDC43E332DA643C2D5E7 /* WidgetKit.framework */; };
+		F70915B61F7B34E029FA709A /* SNSDeskWidgetsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DB27709BABC545AB11DDAB /* SNSDeskWidgetsApp.swift */; };
+		FF429A3F30F53706589ABD4F /* WidgetState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D444641C4D3A1AAA893A611 /* WidgetState.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2AECA96613BADDC06972DA13 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A0C88C2A02EF436DF7FB54DB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C43E97EC4195812D205C1566;
+			remoteInfo = SNSDeskWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		38D5FF32DDBCD5ABA7824B79 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E792F01B04F47A2B6239EA08 /* SNSDeskWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		076CE0BA4C135B7CD8A526F3 /* SNSDeskWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SNSDeskWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CA88637095E165075D5E261 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		4E17FBB619A3172959456810 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5A7870A18C77FE4499842C12 /* SNSDeskWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SNSDeskWidgets.swift; sourceTree = "<group>"; };
+		5C2AFDC43E332DA643C2D5E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		65DB27709BABC545AB11DDAB /* SNSDeskWidgetsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SNSDeskWidgetsApp.swift; sourceTree = "<group>"; };
+		7D444641C4D3A1AAA893A611 /* WidgetState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetState.swift; sourceTree = "<group>"; };
+		86C32976586E1075E66263C0 /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
+		8B50483E40361C247C1A0852 /* SNSDeskWidgets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SNSDeskWidgets.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD926AA9FEB630980489798D /* Style.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Style.swift; sourceTree = "<group>"; };
+		D5D833BA833FBC4FB47CC7BC /* Host.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Host.entitlements; sourceTree = "<group>"; };
+		DA5CFA4C41F897B1AE7CA9C1 /* Widget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Widget.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		00E66E3445BCF04289787FCC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1B8958664D274EF73A966FA /* WidgetKit.framework in Frameworks */,
+				2ECDD1AFA0FF9D6A4E54BB37 /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00BF8126359A9D556FEEF38C /* Host */ = {
+			isa = PBXGroup;
+			children = (
+				D5D833BA833FBC4FB47CC7BC /* Host.entitlements */,
+				65DB27709BABC545AB11DDAB /* SNSDeskWidgetsApp.swift */,
+			);
+			path = Host;
+			sourceTree = "<group>";
+		};
+		0FD073ECC07F1F08451B1F1A = {
+			isa = PBXGroup;
+			children = (
+				00BF8126359A9D556FEEF38C /* Host */,
+				A47F4B8D653AF57E52C77D62 /* Shared */,
+				6825C0642A9737DF3374227D /* Widget */,
+				39555F8E13BB4B27E67F930D /* Frameworks */,
+				21827F9CB9096BFA59A8EA1F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		21827F9CB9096BFA59A8EA1F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8B50483E40361C247C1A0852 /* SNSDeskWidgets.app */,
+				076CE0BA4C135B7CD8A526F3 /* SNSDeskWidgetsExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		39555F8E13BB4B27E67F930D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3CA88637095E165075D5E261 /* SwiftUI.framework */,
+				5C2AFDC43E332DA643C2D5E7 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6825C0642A9737DF3374227D /* Widget */ = {
+			isa = PBXGroup;
+			children = (
+				4E17FBB619A3172959456810 /* Info.plist */,
+				5A7870A18C77FE4499842C12 /* SNSDeskWidgets.swift */,
+				DA5CFA4C41F897B1AE7CA9C1 /* Widget.entitlements */,
+				86C32976586E1075E66263C0 /* WidgetViews.swift */,
+			);
+			path = Widget;
+			sourceTree = "<group>";
+		};
+		A47F4B8D653AF57E52C77D62 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CD926AA9FEB630980489798D /* Style.swift */,
+				7D444641C4D3A1AAA893A611 /* WidgetState.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		382BF395D21CF30CB9F3A3E0 /* SNSDeskWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC92CE979BE9EF460819CB03 /* Build configuration list for PBXNativeTarget "SNSDeskWidgets" */;
+			buildPhases = (
+				21A86A94CFC5C4D2234B1062 /* Sources */,
+				38D5FF32DDBCD5ABA7824B79 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DB9F6A2D501E38077D9C9023 /* PBXTargetDependency */,
+			);
+			name = SNSDeskWidgets;
+			packageProductDependencies = (
+			);
+			productName = SNSDeskWidgets;
+			productReference = 8B50483E40361C247C1A0852 /* SNSDeskWidgets.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C43E97EC4195812D205C1566 /* SNSDeskWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52C568C4318C47979FDD58EA /* Build configuration list for PBXNativeTarget "SNSDeskWidgetsExtension" */;
+			buildPhases = (
+				0AE0C3C4BC41C995CF03CCAC /* Sources */,
+				00E66E3445BCF04289787FCC /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SNSDeskWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = SNSDeskWidgetsExtension;
+			productReference = 076CE0BA4C135B7CD8A526F3 /* SNSDeskWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A0C88C2A02EF436DF7FB54DB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					382BF395D21CF30CB9F3A3E0 = {
+						DevelopmentTeam = 29528WCWRA;
+						ProvisioningStyle = Automatic;
+					};
+					C43E97EC4195812D205C1566 = {
+						DevelopmentTeam = 29528WCWRA;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 55F998A2499475E91A38EFC0 /* Build configuration list for PBXProject "SNSDeskWidgets" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0FD073ECC07F1F08451B1F1A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 21827F9CB9096BFA59A8EA1F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				382BF395D21CF30CB9F3A3E0 /* SNSDeskWidgets */,
+				C43E97EC4195812D205C1566 /* SNSDeskWidgetsExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0AE0C3C4BC41C995CF03CCAC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84C19E2BA69E21DFEB5837B9 /* SNSDeskWidgets.swift in Sources */,
+				DCB7272A21BC44C4DE73318B /* Style.swift in Sources */,
+				1838CCA4B5DA7D428EFEEB9E /* WidgetState.swift in Sources */,
+				37174C103440BC17AFBA8256 /* WidgetViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21A86A94CFC5C4D2234B1062 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F70915B61F7B34E029FA709A /* SNSDeskWidgetsApp.swift in Sources */,
+				1BB02C115FB226579214FE21 /* Style.swift in Sources */,
+				FF429A3F30F53706589ABD4F /* WidgetState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DB9F6A2D501E38077D9C9023 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C43E97EC4195812D205C1566 /* SNSDeskWidgetsExtension */;
+			targetProxy = 2AECA96613BADDC06972DA13 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		00715153C731ED00D6A8E29E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 29528WCWRA;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		0DCABF8209E1514CBBFA0F0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 29528WCWRA;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		13D4603B094A05A9DB389945 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Host/Host.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = NO;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© XTREME ROI";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xtremeroi.snsdesk.widgets;
+				PRODUCT_NAME = "S&S Desk Widgets";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		71CCE210DD98D97EACDC5B39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/Widget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xtremeroi.snsdesk.widgets.ext;
+				PRODUCT_NAME = SNSDeskWidgetsExtension;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		AA93B93941792D560DF4C077 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Host/Host.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = NO;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© XTREME ROI";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xtremeroi.snsdesk.widgets;
+				PRODUCT_NAME = "S&S Desk Widgets";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F678E699401663A5400BB620 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/Widget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xtremeroi.snsdesk.widgets.ext;
+				PRODUCT_NAME = SNSDeskWidgetsExtension;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		52C568C4318C47979FDD58EA /* Build configuration list for PBXNativeTarget "SNSDeskWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				71CCE210DD98D97EACDC5B39 /* Debug */,
+				F678E699401663A5400BB620 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		55F998A2499475E91A38EFC0 /* Build configuration list for PBXProject "SNSDeskWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DCABF8209E1514CBBFA0F0A /* Debug */,
+				00715153C731ED00D6A8E29E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CC92CE979BE9EF460819CB03 /* Build configuration list for PBXNativeTarget "SNSDeskWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13D4603B094A05A9DB389945 /* Debug */,
+				AA93B93941792D560DF4C077 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A0C88C2A02EF436DF7FB54DB /* Project object */;
+}
