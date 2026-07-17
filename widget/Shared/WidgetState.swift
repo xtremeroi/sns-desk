@@ -24,7 +24,7 @@ struct WidgetState: Codable {
     let needsLogin: Bool
     let updatedMs: Double
 
-    static let appGroup = "group.com.xtremeroi.snsdesk"
+    static let appGroup = "29528WCWRA.com.xtremeroi.snsdesk"
 
     /// Read the snapshot from the shared App Group container.
     static func load() -> WidgetState? {

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.20 — 2026-07-16
+
+- **Widgets now show live data.** The desktop widgets were stuck on placeholder
+  because macOS blocks a sandboxed widget from a shared container unless the
+  group name is prefixed with the developer Team ID. Renamed the App Group so
+  the widgets can read Desk's live snapshot. After updating, remove and re-add
+  the tiles once.
+- **Menu-bar icon matches the widget.** The tray mark now keeps its three long
+  bars white and tints only the small stubs with your clock state
+  (green / amber / red), instead of coloring the whole mark.
+
 ## 0.1.19 — 2026-07-16
 
 - **Desktop widgets.** S&S Desk now ships native macOS widgets you can add to your
