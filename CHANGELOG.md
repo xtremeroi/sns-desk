@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.26 — 2026-07-16
+
+- **Idle cutoff now follows the S&S setting — with unpredictable grace.**
+  Activity recording previously stopped after a hardcoded 5 idle minutes;
+  it now uses the manager-set S&S idle allowance as a guaranteed minimum,
+  plus a random 0–40% grace on top, re-rolled every idle episode. You always
+  get at least the configured allowance; the exact cutoff past it varies.
+
 ## 0.1.25 — 2026-07-16
 
 - **Quitting now always clocks you out.** Desk can't track activity while it

@@ -404,6 +404,7 @@ app.whenReady().then(() => {
     isPunchedIn: () => punch.state().status !== "out",
     postSegment: (date, block) => api.putTimeSegment(date, block),
     excludeApps: () => readSettings().excludeApps ?? [],
+    idleBaseMin: () => globalState.timeIdleMin ?? 10,
   });
 
   // Ligature mark as a template icon: macOS flips it black/white with the bar.
