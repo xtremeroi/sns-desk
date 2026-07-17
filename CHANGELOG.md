@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.23 — 2026-07-16
+
+- **Edit "what you're working on" anytime.** The note field now stays visible and
+  editable while you're clocked in — update it whenever, no client or project
+  switch needed. Enter or click away to save; blank clears it.
+
 ## 0.1.22 — 2026-07-16
 
 - **New "Weekly Progress by Project" widget.** The same worked-vs-allocated

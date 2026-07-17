@@ -1,7 +1,6 @@
 /* global sns */
 let state = null;
 let tickBase = null; // ticker base for the local 1s updates
-let noteAsk = false; // client switch happened → ask "what are you working on"
 
 const $ = (id) => document.getElementById(id);
 const fmtHMS = (ms) => {
@@ -93,9 +92,11 @@ function render() {
     tickBase = { todayMs: state.workedMsToday, sessionMs: state.sessionMs, at: Date.now(), frozen: p.status === "break" };
     t.textContent = fmtHMS(state.workedMsToday);
     renderSub(state.workedMsToday, state.sessionMs);
-    // Hidden while clocked in — except right after a client switch, when a
-    // fresh segment wants a fresh note (Enter saves, Esc skips).
-    $("note").style.display = noteAsk ? "" : "none";
+    // Always editable while clocked in — change what you're working on anytime,
+    // no client/project switch needed. Sync the field to the saved note only
+    // when you're not actively typing in it, so pushes don't clobber your edit.
+    $("note").style.display = "";
+    if (document.activeElement !== $("note")) $("note").value = p.note ?? "";
   }
 
   // Action buttons.
@@ -236,11 +237,10 @@ setInterval(() => {
   renderSub(tickBase.todayMs + d, tickBase.sessionMs + d);
 }, 1000);
 
+// After a client/project switch, clear the field and focus it for a fresh note.
 function promptNote() {
-  noteAsk = true;
   const n = $("note");
   n.value = "";
-  n.style.display = "";
   n.focus();
 }
 
@@ -265,20 +265,21 @@ $("project").addEventListener("change", () => {
   promptNote();
 });
 
-// While clocked in, the note field attaches to the open segment.
+// While clocked in, the note field attaches to the open segment. It's always
+// editable — Enter or clicking away commits (blank clears it); Esc reverts.
 $("note").addEventListener("keydown", (e) => {
   if (!state || state.punch.status === "out") return;
   if (e.key === "Enter") {
-    const v = $("note").value.trim();
-    if (v) act("note", { note: v });
-    noteAsk = false;
-    $("note").value = "";
-    $("note").style.display = "none";
+    $("note").blur(); // commit via the blur handler
   } else if (e.key === "Escape") {
-    noteAsk = false;
-    $("note").value = "";
-    $("note").style.display = "none";
+    $("note").value = state.punch.note ?? "";
+    $("note").blur();
   }
+});
+$("note").addEventListener("blur", () => {
+  if (!state || state.punch.status === "out") return; // clocked out: field is the pending clock-in note
+  const v = $("note").value.trim();
+  if (v !== (state.punch.note ?? "")) act("note", { note: v });
 });
 
 // Manual window drag: mousedown on the header (not its buttons) starts it,
