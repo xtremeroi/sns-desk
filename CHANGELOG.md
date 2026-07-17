@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.24 — 2026-07-16
+
+- **Fixes widgets lagging behind the real clock state.** Desk was asking macOS
+  to refresh the widgets every few minutes as the weekly hours drifted, which
+  exhausted the system's daily widget-refresh allowance — after that, macOS
+  defers refreshes and the tiles fall minutes behind on break/resume/switch.
+  Desk now only nudges on real transitions (clock state, client, project,
+  note); the weekly progress bars update on the normal timeline instead.
+
 ## 0.1.23 — 2026-07-16
 
 - **Edit "what you're working on" anytime.** The note field now stays visible and

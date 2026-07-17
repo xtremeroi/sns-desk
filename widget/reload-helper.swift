@@ -8,5 +8,6 @@ import Foundation
 if #available(macOS 11.0, *) {
     WidgetCenter.shared.reloadAllTimelines()
 }
-// Let the reload request dispatch to the widget daemon before we exit.
-Thread.sleep(forTimeInterval: 0.3)
+// Let the reload request dispatch to the widget daemon before we exit —
+// exiting too fast can drop the XPC message on the floor.
+Thread.sleep(forTimeInterval: 1.0)

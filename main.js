@@ -297,11 +297,13 @@ function writeWidgetState() {
     budget: rollupBudgetByClient(globalState.budget?.items ?? []),
     budgetProjects: (globalState.budget?.items ?? []).map((i) => ({ n: i.n, alloc: i.hours, worked: i.clocked, status: i.status })),
   });
-  // The live ticker self-updates via .timer, so only nudge WidgetKit when the
-  // things it CAN'T self-update change: clock state, client/project/note, and
-  // the budget summary. Avoids spamming reloads every 15s tick.
-  const budgetKey = (globalState.budget?.items ?? []).map((i) => `${i.n}:${i.clocked}/${i.hours}`).join(",");
-  const reloadKey = `${st.status}|${st.client?.n ?? "General"}|${st.project ?? ""}|${st.note ?? ""}|${budgetKey}`;
+  // The live ticker self-updates via .timer, so only nudge WidgetKit on real
+  // transitions: clock state, client, project, note. Deliberately NOT the
+  // weekly budget numbers — `clocked` drifts every server refresh while you're
+  // clocked in, and nudging on it burns through WidgetKit's daily reload
+  // budget (~dozens/day); once exhausted, macOS defers ALL reloads and the
+  // tiles lag exactly when it matters. Budget bars ride the 5-min timeline.
+  const reloadKey = `${st.status}|${st.client?.n ?? "General"}|${st.project ?? ""}|${st.note ?? ""}`;
   if (reloadKey !== lastReloadKey) { lastReloadKey = reloadKey; reloadWidgets(); }
 }
 
