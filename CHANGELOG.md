@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.25 — 2026-07-16
+
+- **Quitting now always clocks you out.** Desk can't track activity while it
+  isn't running, so staying clocked in after quitting would leave billed time
+  with nothing behind it. The quit dialog is now "Clock Out & Quit" or Cancel.
+  Restarting to apply an update still keeps you clocked in.
+
 ## 0.1.24 — 2026-07-16
 
 - **Fixes widgets lagging behind the real clock state.** Desk was asking macOS

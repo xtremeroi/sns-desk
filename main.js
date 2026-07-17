@@ -539,17 +539,21 @@ app.on("window-all-closed", () => { /* menu bar app — stay alive */ });
 // server though — quitting while clocked in would leave the person clocked in
 // with nothing watching, so offer the clock-out explicitly.
 async function quitFlow() {
+  // Quit ALWAYS clocks out: with Desk closed nothing records desktop activity,
+  // so "clocked in but not running" would be untracked billed time. The update
+  // restart path (quitAndInstall) bypasses this on purpose — updating an app
+  // shouldn't end a shift.
   if (punch.state().status !== "out") {
     const { response } = await dialog.showMessageBox({
       type: "question",
-      message: "You're still clocked in",
-      detail: "Quitting stops activity tracking on this Mac, but your punch clock keeps running on the server.",
-      buttons: ["Clock Out & Quit", "Quit (stay clocked in)", "Cancel"],
+      message: "Quitting clocks you out",
+      detail: "S&S Desk can't track activity while it isn't running, so quitting also ends your shift.",
+      buttons: ["Clock Out & Quit", "Cancel"],
       defaultId: 0,
-      cancelId: 2,
+      cancelId: 1,
     });
-    if (response === 2) return;
-    if (response === 0) await punch.act("out").catch(() => {});
+    if (response === 1) return;
+    await punch.act("out").catch(() => {});
   }
   tracker.stop();
   // Best-effort visible cue in the panel while we make sure the server has the
