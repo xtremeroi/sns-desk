@@ -9,6 +9,17 @@ struct ClientSlice: Codable, Hashable {
     let live: Bool
 }
 
+// Week-to-date worked vs management-allocated hours, per client (or client·project).
+struct BudgetItem: Codable, Hashable {
+    let n: String       // client (or "client · project") name
+    let alloc: Double   // hours allocated by management
+    let worked: Double  // hours worked, week-to-date
+    let status: String  // "over" | "at" | "behind" | "ok"
+
+    var ratio: Double { alloc > 0 ? worked / alloc : (worked > 0 ? 1 : 0) }
+    var pct: Int { Int((ratio * 100).rounded()) }
+}
+
 struct WidgetState: Codable {
     let status: String            // "out" | "in" | "break"
     let workedMsToday: Double
@@ -23,6 +34,8 @@ struct WidgetState: Codable {
     let pending: Int
     let needsLogin: Bool
     let updatedMs: Double
+    let weekStart: String?        // week the budget is measured over (YYYY-MM-DD)
+    let budget: [BudgetItem]?     // weekly worked-vs-allocated, per client
 
     static let appGroup = "29528WCWRA.com.xtremeroi.snsdesk"
 
@@ -46,7 +59,8 @@ struct WidgetState: Codable {
         status: "out", workedMsToday: 0, sessionMs: 0,
         sessionRefMs: nil, todayRefMs: nil,
         client: "General", project: nil, note: nil,
-        clients: [], actor: nil, pending: 0, needsLogin: false, updatedMs: 0
+        clients: [], actor: nil, pending: 0, needsLogin: false, updatedMs: 0,
+        weekStart: nil, budget: nil
     )
 
     // A representative filled state for Xcode's widget gallery preview.
@@ -59,6 +73,13 @@ struct WidgetState: Codable {
             ClientSlice(n: "Simpletics", ms: 62 * 60_000, live: false),
             ClientSlice(n: "TNGstore", ms: 34 * 60_000, live: false),
         ],
-        actor: "You", pending: 0, needsLogin: false, updatedMs: 0
+        actor: "You", pending: 0, needsLogin: false, updatedMs: 0,
+        weekStart: "2026-07-12",
+        budget: [
+            BudgetItem(n: "Cangshan Cutlery", alloc: 10, worked: 6.2, status: "behind"),
+            BudgetItem(n: "Simpletics", alloc: 8, worked: 8.1, status: "over"),
+            BudgetItem(n: "Destination Decal", alloc: 6, worked: 3.0, status: "behind"),
+            BudgetItem(n: "TNGstore", alloc: 4, worked: 4.0, status: "at"),
+        ]
     )
 }

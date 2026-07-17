@@ -37,6 +37,7 @@ struct SNSDeskWidgetBundle: WidgetBundle {
         TodayWidget()
         SessionWidget()
         ClientsWidget()
+        WeeklyProgressWidget()
     }
 }
 
@@ -77,6 +78,19 @@ struct ClientsWidget: Widget {
         }
         .configurationDisplayName("Today by Client")
         .description("Today's time split across clients — the billing view.")
-        .supportedFamilies([.systemMedium])
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct WeeklyProgressWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "SNSWeeklyProgressWidget", provider: SNSProvider()) { entry in
+            WeeklyProgressView(state: entry.state)
+                .widgetURL(snsDeskURL)
+                .containerBackground(for: .widget) { SNSBackground() }
+        }
+        .configurationDisplayName("Weekly Progress")
+        .description("Hours worked vs. what management allocated, this week per client.")
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }

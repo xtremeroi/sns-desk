@@ -215,12 +215,21 @@ function onAuthed(body) {
     roster: body.roster ?? [],
     punchLockMin: body.punchLockMin ?? 45,
     timeIdleMin: body.timeIdleMin ?? 10,
+    clientProjects: globalState.clientProjects ?? {},
+    budget: globalState.budget ?? null,
   };
   punch.sync().then(() => drainAll());
   if (leaveWatch) leaveWatch.poll();
   // Per-client project registry (managers define it in S&S) — powers the
   // project picker. Refreshed on each auth so new projects appear live.
   api.getClientProjects().then((r) => { if (r.ok) { globalState.clientProjects = r.body.projects ?? {}; pushState(); } });
+  // Weekly worked-vs-allocated hours (management budgets) — powers the progress
+  // widget. Refreshed on each auth (~60s) so the bars stay current.
+  if (globalState.actor) {
+    api.getBudgetStatus(globalState.actor, api.localDate()).then((r) => {
+      if (r.ok) { globalState.budget = { weekStart: r.body.weekStart ?? null, items: r.body.items ?? [] }; pushState(); }
+    });
+  }
   pushState();
 }
 
@@ -230,6 +239,18 @@ function onAuthed(body) {
 // when Desk is fully in the background). `*RefMs` are epoch anchors the widget
 // feeds to SwiftUI's .timer so the current session/day counts up live on-screen
 // without waking the extension; null when not clocked in (shows a static value).
+let lastReloadKey = null; // meaningful-state signature; nudge WidgetKit when it changes
+
+// Ask WidgetKit to reload Desk's widgets NOW. Electron can't call WidgetCenter,
+// so we spawn a tiny signed helper bundled at Contents/MacOS/sns-widget-reload;
+// run from inside the app bundle, its main bundle resolves to Desk so
+// reloadAllTimelines() targets Desk's embedded extension.
+function reloadWidgets() {
+  if (process.platform !== "darwin" || !app.isPackaged) return;
+  const helper = path.join(process.resourcesPath, "..", "MacOS", "sns-widget-reload");
+  try { require("child_process").execFile(helper, [], () => {}); } catch { /* best effort */ }
+}
+
 function writeWidgetState() {
   const st = punch.state();
   const now = Date.now();
@@ -250,7 +271,15 @@ function writeWidgetState() {
     pending: punch.pendingCount() + tracker.pendingCount(),
     needsLogin: needsLogin || punch.needsLogin,
     updatedMs: now,
+    weekStart: globalState.budget?.weekStart ?? null,
+    budget: (globalState.budget?.items ?? []).map((i) => ({ n: i.n, alloc: i.hours, worked: i.clocked, status: i.status })),
   });
+  // The live ticker self-updates via .timer, so only nudge WidgetKit when the
+  // things it CAN'T self-update change: clock state, client/project/note, and
+  // the budget summary. Avoids spamming reloads every 15s tick.
+  const budgetKey = (globalState.budget?.items ?? []).map((i) => `${i.n}:${i.clocked}/${i.hours}`).join(",");
+  const reloadKey = `${st.status}|${st.client?.n ?? "General"}|${st.project ?? ""}|${st.note ?? ""}|${budgetKey}`;
+  if (reloadKey !== lastReloadKey) { lastReloadKey = reloadKey; reloadWidgets(); }
 }
 
 function pushState() {

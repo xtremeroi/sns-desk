@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.21 — 2026-07-16
+
+- **Widgets update instantly.** Clock in/out, break, or switch client and the
+  tiles now refresh right away instead of waiting on macOS's slow widget timer
+  (Desk nudges WidgetKit to reload on every change).
+- **New "Weekly Progress" widget.** Hours worked vs. what management allocated
+  this week, per client, as progress bars with a percentage — behind (blue),
+  on-track (green), over (red). Medium and large sizes.
+- **"Today by client" gains a large (4-block) size** for a longer list.
+- **Logo polish.** The S&S mark now appears on the small tiles too, and hides
+  automatically whenever it would overlap content instead of sitting on top of it.
+
 ## 0.1.20 — 2026-07-16
 
 - **Widgets now show live data.** The desktop widgets were stuck on placeholder

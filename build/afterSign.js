@@ -30,6 +30,13 @@ exports.default = async function afterSign(context) {
   fs.rmSync(appexDst, { recursive: true, force: true });
   run("cp", ["-R", appexSrc, appexDst]); // keeps the appex's own Developer ID signature
 
+  // Reload helper: Desk spawns it to nudge WidgetKit. Lives next to the main
+  // executable so its Bundle.main resolves to Desk.
+  const reloadSrc = path.join(projectDir, "build", "widget-ext", "sns-widget-reload");
+  const reloadDst = path.join(appPath, "Contents", "MacOS", "sns-widget-reload");
+  fs.rmSync(reloadDst, { force: true });
+  run("cp", [reloadSrc, reloadDst]);
+
   // Re-seal the outer app so PlugIns is part of its signature. NOT --deep, so
   // the appex's inside-out signature is preserved.
   console.log("[afterSign] re-sealing outer app");

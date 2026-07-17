@@ -55,6 +55,7 @@ struct TodayView: View {
                     staticMs: state.workedMsToday,
                     size: family == .systemMedium ? 40 : 30,
                     color: SNS.statusColor(state.status))
+                .brandProtect()
             Spacer(minLength: 0)
             HStack(spacing: 6) {
                 Text(state.client)
@@ -64,9 +65,10 @@ struct TodayView: View {
                     Text("/ \(p)").font(.system(size: 12)).foregroundStyle(SNS.dim).lineLimit(1)
                 }
             }
+            .brandProtect()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .brandmark(family == .systemMedium, stub: SNS.markStub(state.status))
+        .stateBrandmark(stub: SNS.markStub(state.status))
     }
 }
 
@@ -109,19 +111,22 @@ struct SessionView: View {
                     Text(note).font(.system(size: 11)).foregroundStyle(SNS.dim).lineLimit(1)
                 }
             }
+            .brandProtect()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .brandmark(family == .systemMedium, stub: SNS.markStub(state.status))
+        .stateBrandmark(stub: SNS.markStub(state.status))
     }
 }
 
 // MARK: - Clients
 
 struct ClientsView: View {
+    @Environment(\.widgetFamily) private var family
     let state: WidgetState
 
     private var total: Double { state.clients.reduce(0) { $0 + $1.ms } }
     private var maxMs: Double { max(state.clients.map(\.ms).max() ?? 1, 1) }
+    private var maxRows: Int { family == .systemLarge ? 12 : 4 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -140,15 +145,15 @@ struct ClientsView: View {
                 Spacer()
             } else {
                 VStack(spacing: 4) {
-                    ForEach(state.clients.prefix(4), id: \.self) { c in
-                        ClientRow(slice: c, maxMs: maxMs)
+                    ForEach(state.clients.prefix(maxRows), id: \.self) { c in
+                        ClientRow(slice: c, maxMs: maxMs).brandProtect()
                     }
                 }
                 Spacer(minLength: 0)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .brandmark(true, stub: SNS.markStub(state.status))
+        .stateBrandmark(stub: SNS.markStub(state.status))
     }
 }
 
@@ -179,8 +184,72 @@ private struct ClientRow: View {
     }
 }
 
+// MARK: - Weekly progress (worked vs management-allocated)
+
+struct WeeklyProgressView: View {
+    @Environment(\.widgetFamily) private var family
+    let state: WidgetState
+    private var items: [BudgetItem] { state.budget ?? [] }
+    private var maxRows: Int { family == .systemLarge ? 11 : 4 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Weekly progress")
+                    .font(.system(size: 11, weight: .semibold)).foregroundStyle(SNS.dim)
+                Spacer()
+                if let ws = state.weekStart {
+                    Text(weekLabel(ws)).font(.system(size: 10)).foregroundStyle(SNS.dim)
+                }
+            }
+            if items.isEmpty {
+                Spacer()
+                Text("No hours allocated yet")
+                    .font(.system(size: 12)).foregroundStyle(SNS.dim)
+                Spacer()
+            } else {
+                VStack(spacing: 4) {
+                    ForEach(items.prefix(maxRows), id: \.self) { BudgetRow(item: $0).brandProtect() }
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .stateBrandmark(stub: SNS.markStub(state.status))
+    }
+}
+
+private struct BudgetRow: View {
+    let item: BudgetItem
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 6).fill(Color.white.opacity(0.05))
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(budgetColor(item.status).opacity(0.30))
+                    .frame(width: max(8, geo.size.width * min(CGFloat(item.ratio), 1.0)))
+                HStack(spacing: 6) {
+                    Text(item.n).font(.system(size: 12)).foregroundStyle(SNS.text).lineLimit(1)
+                    Spacer(minLength: 4)
+                    Text("\(fmtHours(item.worked))/\(fmtHours(item.alloc))h")
+                        .font(.system(size: 10, design: .monospaced)).foregroundStyle(SNS.dim)
+                    Text("\(item.pct)%")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(budgetColor(item.status))
+                        .frame(width: 40, alignment: .trailing)
+                }
+                .padding(.horizontal, 8)
+            }
+        }
+        .frame(height: 24)
+    }
+}
+
 // MARK: - Previews
 
+#Preview("Progress", as: .systemMedium) { WeeklyProgressWidget() } timeline: {
+    SNSEntry(date: .now, state: .sample)
+}
 #Preview("Today", as: .systemSmall) { TodayWidget() } timeline: {
     SNSEntry(date: .now, state: .sample)
     SNSEntry(date: .now, state: .placeholder)

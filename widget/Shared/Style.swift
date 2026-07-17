@@ -77,6 +77,27 @@ func fmtHMS(_ ms: Double) -> String {
     return String(format: "%d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
 }
 
+// hours -> "6.2" or "10"
+func fmtHours(_ h: Double) -> String {
+    h == h.rounded() ? "\(Int(h))" : String(format: "%.1f", h)
+}
+
+// Weekly-progress bar color by budget status.
+func budgetColor(_ status: String) -> Color {
+    switch status {
+    case "over": return SNS.red
+    case "at", "ok": return SNS.green
+    default: return SNS.accent   // "behind" — still working toward the target
+    }
+}
+
+// "2026-07-12" -> "wk of 7/12"
+func weekLabel(_ ws: String) -> String {
+    let p = ws.split(separator: "-")
+    guard p.count == 3, let m = Int(p[1]), let d = Int(p[2]) else { return ws }
+    return "wk of \(m)/\(d)"
+}
+
 // Deep link back into Desk (Desk registers the snsdesk:// scheme — see README).
 let snsDeskURL = URL(string: "snsdesk://open")!
 
@@ -113,14 +134,40 @@ struct SNSLogoMark: View {
     }
 }
 
+// Collision-aware S&S watermark. Content that must not be covered reports its
+// frame via brandProtect(); the logo hides whenever it would overlap any of
+// them, so it only shows when the bottom-right corner is actually free (which
+// also lets it appear on the small tiles when there's room).
+struct BrandOccludeKey: PreferenceKey {
+    static var defaultValue: [CGRect] = []
+    static func reduce(value: inout [CGRect], nextValue: () -> [CGRect]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
 extension View {
-    // S&S watermark, bottom-right (medium tiles). White bars stay white; the
-    // stub color carries the clock state, mirroring the menu-bar icon.
-    func brandmark(_ show: Bool, stub: Color) -> some View {
-        overlay(alignment: .bottomTrailing) {
-            if show {
-                SNSLogoMark(stub: stub)
-                    .frame(width: 14, height: 14)
+    // Tag content the logo must not cover.
+    func brandProtect() -> some View {
+        background(GeometryReader { p in
+            Color.clear.preference(key: BrandOccludeKey.self, value: [p.frame(in: .global)])
+        })
+    }
+
+    // Bottom-right state logo; hidden if it would intersect protected content.
+    func stateBrandmark(stub: Color) -> some View {
+        overlayPreferenceValue(BrandOccludeKey.self) { rects in
+            GeometryReader { geo in
+                let sz: CGFloat = 14, inset: CGFloat = 4, margin: CGFloat = 3
+                let f = geo.frame(in: .global)
+                let logoGlobal = CGRect(x: f.maxX - sz - inset - margin,
+                                        y: f.maxY - sz - inset - margin,
+                                        width: sz + 2 * margin, height: sz + 2 * margin)
+                if !rects.contains(where: { $0.intersects(logoGlobal) }) {
+                    SNSLogoMark(stub: stub)
+                        .frame(width: sz, height: sz)
+                        .position(x: geo.size.width - sz / 2 - inset,
+                                  y: geo.size.height - sz / 2 - inset)
+                }
             }
         }
     }

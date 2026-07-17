@@ -30,3 +30,11 @@ codesign --force --options runtime --timestamp \
 
 codesign -dv --verbose=2 "$STAGE/SNSDeskWidgetsExtension.appex" 2>&1 | grep -iE "Authority=Developer ID|TeamIdentifier|runtime"
 echo "✓ staged at $STAGE/SNSDeskWidgetsExtension.appex"
+
+echo "→ building reload helper (universal, Developer ID)…"
+swiftc -O -target arm64-apple-macos14  -framework WidgetKit "$WIDGET/reload-helper.swift" -o "$DERIVED/reload-arm64"
+swiftc -O -target x86_64-apple-macos14 -framework WidgetKit "$WIDGET/reload-helper.swift" -o "$DERIVED/reload-x64"
+lipo -create "$DERIVED/reload-arm64" "$DERIVED/reload-x64" -output "$STAGE/sns-widget-reload"
+codesign --force --options runtime --timestamp --sign "$IDENTITY" "$STAGE/sns-widget-reload"
+codesign -dv --verbose=2 "$STAGE/sns-widget-reload" 2>&1 | grep -iE "Authority=Developer ID|runtime"
+echo "✓ staged at $STAGE/sns-widget-reload"
