@@ -251,6 +251,28 @@ function reloadWidgets() {
   try { require("child_process").execFile(helper, [], () => {}); } catch { /* best effort */ }
 }
 
+// Roll the flat budget lines (client or client::project) up to one row per
+// client, summing worked + allocated. Status recomputed pace-aware, matching
+// the server's rule (weeks run Mon–Sun).
+function rollupBudgetByClient(items) {
+  const byClient = new Map();
+  for (const it of items) {
+    const cid = String(it.id ?? it.n).split("::")[0];
+    const name = String(it.n).split(" · ")[0];
+    const cur = byClient.get(cid) ?? { n: name, alloc: 0, worked: 0 };
+    cur.alloc += it.hours ?? 0;
+    cur.worked += it.clocked ?? 0;
+    byClient.set(cid, cur);
+  }
+  const dayFrac = (((new Date().getDay() + 6) % 7) + 1) / 7;
+  return [...byClient.values()].map((c) => {
+    const ratio = c.alloc > 0 ? c.worked / c.alloc : 0;
+    const status = ratio >= 1.05 ? "over" : ratio >= 1 ? "at"
+      : (dayFrac >= 0.4 && ratio < dayFrac * 0.5) ? "behind" : "ok";
+    return { n: c.n, alloc: c.alloc, worked: Math.round(c.worked * 10) / 10, status };
+  });
+}
+
 function writeWidgetState() {
   const st = punch.state();
   const now = Date.now();
@@ -272,7 +294,8 @@ function writeWidgetState() {
     needsLogin: needsLogin || punch.needsLogin,
     updatedMs: now,
     weekStart: globalState.budget?.weekStart ?? null,
-    budget: (globalState.budget?.items ?? []).map((i) => ({ n: i.n, alloc: i.hours, worked: i.clocked, status: i.status })),
+    budget: rollupBudgetByClient(globalState.budget?.items ?? []),
+    budgetProjects: (globalState.budget?.items ?? []).map((i) => ({ n: i.n, alloc: i.hours, worked: i.clocked, status: i.status })),
   });
   // The live ticker self-updates via .timer, so only nudge WidgetKit when the
   // things it CAN'T self-update change: clock state, client/project/note, and

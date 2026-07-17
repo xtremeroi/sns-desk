@@ -38,6 +38,7 @@ struct SNSDeskWidgetBundle: WidgetBundle {
         SessionWidget()
         ClientsWidget()
         WeeklyProgressWidget()
+        WeeklyProjectsWidget()
     }
 }
 
@@ -91,6 +92,19 @@ struct WeeklyProgressWidget: Widget {
         }
         .configurationDisplayName("Weekly Progress")
         .description("Hours worked vs. what management allocated, this week per client.")
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct WeeklyProjectsWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "SNSWeeklyProjectsWidget", provider: SNSProvider()) { entry in
+            WeeklyProgressView(state: entry.state, projectLevel: true)
+                .widgetURL(snsDeskURL)
+                .containerBackground(for: .widget) { SNSBackground() }
+        }
+        .configurationDisplayName("Weekly Progress by Project")
+        .description("Hours worked vs. allocated this week, broken out per project.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }

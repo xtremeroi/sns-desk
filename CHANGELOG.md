@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.22 — 2026-07-16
+
+- **New "Weekly Progress by Project" widget.** The same worked-vs-allocated
+  progress bars, broken out per project (Client · Project) instead of rolled up.
+  "Weekly Progress" now aggregates each client's project lines into one client
+  row; add the by-project widget for the detail. Medium and large.
+
 ## 0.1.21 — 2026-07-16
 
 - **Widgets update instantly.** Clock in/out, break, or switch client and the

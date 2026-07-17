@@ -189,13 +189,14 @@ private struct ClientRow: View {
 struct WeeklyProgressView: View {
     @Environment(\.widgetFamily) private var family
     let state: WidgetState
-    private var items: [BudgetItem] { state.budget ?? [] }
+    var projectLevel: Bool = false
+    private var items: [BudgetItem] { (projectLevel ? state.budgetProjects : state.budget) ?? [] }
     private var maxRows: Int { family == .systemLarge ? 11 : 4 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("Weekly progress")
+                Text(projectLevel ? "Weekly by project" : "Weekly progress")
                     .font(.system(size: 11, weight: .semibold)).foregroundStyle(SNS.dim)
                 Spacer()
                 if let ws = state.weekStart {
@@ -204,7 +205,7 @@ struct WeeklyProgressView: View {
             }
             if items.isEmpty {
                 Spacer()
-                Text("No hours allocated yet")
+                Text(projectLevel ? "No project allocations yet" : "No hours allocated yet")
                     .font(.system(size: 12)).foregroundStyle(SNS.dim)
                 Spacer()
             } else {

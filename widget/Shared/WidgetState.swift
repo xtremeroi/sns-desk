@@ -34,8 +34,9 @@ struct WidgetState: Codable {
     let pending: Int
     let needsLogin: Bool
     let updatedMs: Double
-    let weekStart: String?        // week the budget is measured over (YYYY-MM-DD)
-    let budget: [BudgetItem]?     // weekly worked-vs-allocated, per client
+    let weekStart: String?         // week the budget is measured over (YYYY-MM-DD)
+    let budget: [BudgetItem]?      // weekly worked-vs-allocated, rolled up per client
+    let budgetProjects: [BudgetItem]? // same, per project line ("Client · Project")
 
     static let appGroup = "29528WCWRA.com.xtremeroi.snsdesk"
 
@@ -60,7 +61,7 @@ struct WidgetState: Codable {
         sessionRefMs: nil, todayRefMs: nil,
         client: "General", project: nil, note: nil,
         clients: [], actor: nil, pending: 0, needsLogin: false, updatedMs: 0,
-        weekStart: nil, budget: nil
+        weekStart: nil, budget: nil, budgetProjects: nil
     )
 
     // A representative filled state for Xcode's widget gallery preview.
@@ -80,6 +81,13 @@ struct WidgetState: Codable {
             BudgetItem(n: "Simpletics", alloc: 8, worked: 8.1, status: "over"),
             BudgetItem(n: "Destination Decal", alloc: 6, worked: 3.0, status: "behind"),
             BudgetItem(n: "TNGstore", alloc: 4, worked: 4.0, status: "at"),
+        ],
+        budgetProjects: [
+            BudgetItem(n: "Cangshan · PDP Optimization", alloc: 6, worked: 4.1, status: "behind"),
+            BudgetItem(n: "Cangshan · A+ Content", alloc: 4, worked: 2.1, status: "behind"),
+            BudgetItem(n: "Simpletics · Launch", alloc: 5, worked: 5.4, status: "over"),
+            BudgetItem(n: "Simpletics · Subscription", alloc: 3, worked: 2.7, status: "ok"),
+            BudgetItem(n: "Destination Decal · Retainer", alloc: 6, worked: 3.0, status: "behind"),
         ]
     )
 }
