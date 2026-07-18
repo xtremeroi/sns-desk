@@ -226,6 +226,7 @@ function onAuthed(body) {
   globalState = {
     actor: body.actor ?? null,
     isTeam: !!body.isTeam,
+    isManager: !!body.isManager,
     roster: body.roster ?? [],
     punchLockMin: body.punchLockMin ?? 45,
     timeIdleMin: body.timeIdleMin ?? 10,
@@ -340,6 +341,21 @@ function allocatedProjectsByClient() {
   return map;
 }
 
+// Client ids the employee is ASSIGNED to (any budget line, bare or ::project).
+// Employees may only clock assigned clients (Randy 2026-07-18); managers are
+// exempt. null = budget not loaded yet (renderer shows the full roster until
+// it arrives; the server gate is the backstop for that window).
+function assignedClientIds() {
+  if (!globalState.budget) return null;
+  const ids = new Set();
+  for (const it of globalState.budget.items ?? []) {
+    const id = String(it.id ?? "");
+    const sep = id.indexOf("::");
+    ids.add(sep > 0 ? id.slice(0, sep) : id);
+  }
+  return [...ids];
+}
+
 function pushState() {
   updateTray();
   writeWidgetState();
@@ -351,6 +367,8 @@ function pushState() {
     needsLogin: needsLogin || punch.needsLogin,
     actor: globalState.actor,
     roster: globalState.roster,
+    isManager: !!globalState.isManager,
+    assignedClients: assignedClientIds(),
     clientProjects: globalState.clientProjects,
     allocProjects: allocatedProjectsByClient(),
     punch: punch.state(),

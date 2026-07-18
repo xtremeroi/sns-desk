@@ -74,7 +74,10 @@ function render() {
   $("who").textContent = state.actor ?? "";
   $("banner").style.display = state.needsLogin ? "flex" : "none";
 
-  // Roster select (keep selection stable across pushes).
+  // Roster select (keep selection stable across pushes). Employees only see
+  // clients they're ASSIGNED to (any budget line); managers see everything.
+  // assignedClients === null means budgets haven't loaded yet — show the full
+  // roster for that moment; the server rejects unassigned punches regardless.
   const sel = $("client");
   const cur = sel.value;
   sel.innerHTML = "";
@@ -82,7 +85,14 @@ function render() {
   none.value = "";
   none.textContent = "No client (General)";
   sel.appendChild(none);
-  for (const c of state.roster ?? []) {
+  const assigned = state.isManager || state.assignedClients == null ? null : new Set(state.assignedClients);
+  let visible = (state.roster ?? []).filter((c) => !assigned || assigned.has(c.id));
+  // An open session on a now-unassigned client stays visible so the panel
+  // tells the truth and the person can switch away.
+  if (p.status !== "out" && p.client && !visible.some((c) => c.id === p.client.id)) {
+    visible = [...visible, { id: p.client.id, name: p.client.n }];
+  }
+  for (const c of visible) {
     const o = document.createElement("option");
     o.value = c.id;
     o.dataset.n = c.name;

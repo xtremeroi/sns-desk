@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.30 — 2026-07-18
+
+- **You only see clients you're assigned to.** The client dropdown now shows
+  just the clients management has allocated you hours on — a bare client
+  allocation unlocks the whole client, a project allocation unlocks that
+  project only. General is always available for non-client time, and managers
+  see everything. If a client you work on is missing, ask a manager to
+  allocate you hours.
+
 ## 0.1.29 — 2026-07-18
 
 - **Updates now install themselves.** A staged update applies automatically the
