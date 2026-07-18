@@ -40,6 +40,20 @@ function sendUpdateStatus(text, tone = "ok", persist = false) {
   if (popup && !popup.isDestroyed()) popup.webContents.send("update-status", { text, tone, persist });
 }
 
+// Apply a staged update WITHOUT waiting for a quit that may never come.
+// Login-item users leave Desk running for days; their only "quit" is shutdown,
+// where macOS kills the installer mid-apply and the same update re-stages
+// forever. Instead, restart ourselves at a harmless moment: clocked out and
+// panel closed. Never touches an active shift.
+function maybeAutoApplyUpdate() {
+  if (!updateReady || !app.isPackaged) return;
+  if (punch.state().status !== "out") return;
+  if (popup && !popup.isDestroyed() && popup.isVisible()) return;
+  console.log(`[sns-desk] auto-applying staged update ${updateReady} (idle)`);
+  tracker.stop();
+  autoUpdater.quitAndInstall(true, true); // silent, relaunch after install
+}
+
 // User-triggered update check (tray menu / version badge). Gives feedback the
 // silent background check doesn't: "up to date", "downloading", or an error.
 function checkForUpdatesNow() {
@@ -388,8 +402,29 @@ async function flushBeforeQuit(maxMs = 4000) {
 // and packaged builds alike.
 app.setPath("userData", path.join(app.getPath("appData"), "sns-desk"));
 
+// One instance only. Login items + stray copies (Downloads, custom "startup"
+// folders) can produce duplicates that double-track and fight over updates.
+if (!app.requestSingleInstanceLock()) app.quit();
+
 app.whenReady().then(() => {
   if (app.dock) app.dock.hide();
+
+  // Squirrel can only update an app it can replace. A copy running from
+  // Downloads / a DMG / a homemade startup folder gets translocated by
+  // Gatekeeper to a read-only mount, where EVERY update apply fails forever.
+  // Offer the fix once: move ourselves into /Applications properly.
+  if (app.isPackaged && !app.isInApplicationsFolder()) {
+    dialog.showMessageBox({
+      type: "warning",
+      message: "S&S Desk needs to live in Applications",
+      detail: "Running from this location breaks automatic updates. Move it to the Applications folder now? (It relaunches automatically.)",
+      buttons: ["Move to Applications", "Not Now"],
+      defaultId: 0,
+      cancelId: 1,
+    }).then(({ response }) => {
+      if (response === 0) { try { app.moveToApplicationsFolder(); } catch (e) { console.log("[sns-desk] move failed:", e?.message); } }
+    });
+  }
   session.defaultSession.setUserAgent(CHROME_UA);
   console.log("[sns-desk] userData:", app.getPath("userData"));
 
@@ -492,10 +527,11 @@ app.whenReady().then(() => {
       updateTray();
       new Notification({
         title: "S&S Desk update ready",
-        body: `Version ${info.version} installs the next time you quit — or right-click the menu bar icon and choose Restart to update.`,
+        body: `Version ${info.version} installs itself the next time you're clocked out — or right-click the menu bar icon and choose Restart to update.`,
       }).show();
       sendUpdateStatus(`v${info.version} ready — restart`, "warn", true);
       manualUpdateCheck = false;
+      setTimeout(maybeAutoApplyUpdate, 60_000);
     });
     autoUpdater.on("error", (e) => {
       console.log("[updater] error:", e && e.message ? e.message : e);
@@ -508,6 +544,9 @@ app.whenReady().then(() => {
     const check = () => autoUpdater.checkForUpdates().catch(() => {});
     check();
     setInterval(check, 6 * 3600_000);
+    // Keep trying to apply a staged update at idle moments (clocked out,
+    // panel closed) so login-item users don't carry it around for days.
+    setInterval(() => { try { maybeAutoApplyUpdate(); } catch { /* next tick */ } }, 15 * 60_000);
   }
   // The persisted cookie store loads asynchronously; a fetch fired straight
   // from whenReady races it and sees no CF_Authorization (spurious ⚠ at every

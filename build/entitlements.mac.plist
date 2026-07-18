@@ -13,5 +13,12 @@
   <!-- Allow loading the app's own unsigned helper libraries under hardened runtime. -->
   <key>com.apple.security.cs.disable-library-validation</key>
   <true/>
+  <!-- Declare our App Group (shared with the widget extension). Without this,
+       writing the widget snapshot into ~/Library/Group Containers trips the
+       macOS "access data from other apps" privacy prompt at first launch. -->
+  <key>com.apple.security.application-groups</key>
+  <array>
+    <string>29528WCWRA.com.xtremeroi.snsdesk</string>
+  </array>
 </dict>
 </plist>

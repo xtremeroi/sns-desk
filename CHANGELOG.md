@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.29 — 2026-07-18
+
+- **Updates now install themselves.** A staged update applies automatically the
+  next time you're clocked out with the panel closed (Desk restarts itself and
+  keeps your clock state) — no more waiting for a quit that never happens if
+  Desk launches at login and runs for days.
+- **Fixes the endless update loop for copies outside Applications.** If Desk is
+  running from Downloads, a DMG, or a homemade startup folder, macOS blocks it
+  from ever updating itself. Desk now detects this and offers to move itself to
+  the Applications folder, which fixes updates for good. Use the tray's
+  "Launch at Login" toggle instead of manual startup folders.
+- **No more "access data from other apps" prompt at first launch.** Desk now
+  declares its shared widget-data container properly, so macOS doesn't ask.
+- **One instance only.** A second copy of Desk quits immediately instead of
+  double-tracking.
+
 ## 0.1.28 — 2026-07-17
 
 - **Project lists follow your allocations.** When management has allocated you
