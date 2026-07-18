@@ -25,18 +25,29 @@ function selectedClient() {
 function selectedProject() {
   return $("project").value || null;
 }
+function clientProjects(clientId) {
+  return (clientId && state && state.clientProjects) ? (state.clientProjects[clientId] ?? []) : [];
+}
 // Fill the project dropdown from the selected client's registry. Hidden when
 // the client (or General) has no projects defined. keepValue preserves the
 // current selection across a re-render.
+// Projects are REQUIRED when the client defines any: no generic "No project"
+// bucket for those clients — a disabled placeholder forces an explicit pick
+// before clock-in or switch, so time can't bill to the bare client name.
 function populateProjects(clientId, keepValue) {
   const psel = $("project");
   const prev = keepValue ? psel.value : "";
-  const projects = (clientId && state.clientProjects) ? (state.clientProjects[clientId] ?? []) : [];
+  const projects = clientProjects(clientId);
   psel.innerHTML = "";
-  const none = document.createElement("option");
-  none.value = "";
-  none.textContent = "No project";
-  psel.appendChild(none);
+  const first = document.createElement("option");
+  first.value = "";
+  if (projects.length) {
+    first.textContent = "— pick a project —";
+    first.disabled = true;
+  } else {
+    first.textContent = "No project";
+  }
+  psel.appendChild(first);
   for (const name of projects) {
     const o = document.createElement("option");
     o.value = name;
@@ -44,7 +55,7 @@ function populateProjects(clientId, keepValue) {
     psel.appendChild(o);
   }
   psel.style.display = projects.length ? "" : "none";
-  if (prev && projects.includes(prev)) psel.value = prev;
+  psel.value = prev && projects.includes(prev) ? prev : "";
 }
 
 function render() {
@@ -75,9 +86,11 @@ function render() {
   if (p.status !== "out" && p.client) sel.value = p.client.id;
   else if (cur) sel.value = cur;
 
-  // Project select follows the chosen client; reflects the open session's project.
+  // Project select follows the chosen client; reflects the open session's
+  // project. A project-less open session on a client WITH projects (legacy or
+  // pre-registry) keeps the disabled placeholder — picking one switches.
   populateProjects(sel.value, true);
-  if (p.status !== "out") $("project").value = p.project ?? "";
+  if (p.status !== "out" && p.project) $("project").value = p.project;
 
   // Ticker (DAY total — continuous across client switches) + session subline.
   const t = $("ticker");
@@ -111,7 +124,13 @@ function render() {
   };
   if (p.status === "out") {
     mk("Clock in", "primary", () => {
-      act("in", { client: selectedClient(), project: selectedProject() || undefined, note: $("note").value.trim() || undefined });
+      const c = selectedClient();
+      if (c && clientProjects(c.id).length && !selectedProject()) {
+        showUpdMsg("pick a project first", true);
+        $("project").focus();
+        return;
+      }
+      act("in", { client: c, project: selectedProject() || undefined, note: $("note").value.trim() || undefined });
       $("note").value = "";
     });
   } else {
@@ -246,10 +265,23 @@ function promptNote() {
 
 // Client switch while clocked in → split the running segment server-side,
 // then ask what this new segment is about (every switch, fresh note).
+// A client that requires a project HOLDS the switch until one is picked (the
+// project-change handler fires it); billing stays on the old client meanwhile
+// and the subline keeps showing the truth.
 $("client").addEventListener("change", () => {
   populateProjects(selectedClient()?.id ?? "", false); // new client → fresh project list, reset selection
-  if (!state || state.punch.status === "out") return;
+  if (!state) return;
   const c = selectedClient();
+  const needsProject = c && clientProjects(c.id).length && !selectedProject();
+  if (state.punch.status === "out") {
+    if (needsProject) $("project").focus();
+    return;
+  }
+  if (needsProject) {
+    showUpdMsg("pick a project to switch", true);
+    $("project").focus();
+    return;
+  }
   if (c) act("switch", { client: c, project: selectedProject() || undefined });
   else if (state.punch.client) act("switch", { general: true }); // client → General splits too
   else return; // General → General: nothing changed

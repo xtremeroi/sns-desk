@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.27 — 2026-07-17
+
+- **Projects are now required where they exist.** If a client has projects
+  defined in S&S, you must pick one — the generic "No project" option is gone
+  for those clients, clock-in asks you to pick a project first, and switching
+  to such a client waits until you've chosen (billing stays on your previous
+  client until then). Clients without projects work exactly as before.
+
 ## 0.1.26 — 2026-07-16
 
 - **Idle cutoff now follows the S&S setting — with unpredictable grace.**
