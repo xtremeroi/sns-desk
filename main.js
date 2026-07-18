@@ -29,6 +29,44 @@ let leaveWatch = null;
 let globalState = { actor: null, isTeam: false, roster: [], clientProjects: {}, punchLockMin: 45, timeIdleMin: 10 };
 let needsLogin = false;
 let lockedAt = null;
+
+// ── Proof-of-life heartbeat ─────────────────────────────────────────────────
+// The lock/sleep safety net only fires on RETURN — power-off, crash, or
+// force-quit while clocked in used to leave the session running until the 12h
+// cap. We persist a once-a-minute heartbeat (plus lock state) to disk; on the
+// next launch, an open session that predates a gap longer than the manager-set
+// grace gets retroactively clocked out at the last proof of life.
+const aliveFile = () => path.join(app.getPath("userData"), "last-alive.json");
+function writeAlive() {
+  try { fs.writeFileSync(aliveFile(), JSON.stringify({ t: Date.now(), lockedAt })); } catch { /* best effort */ }
+}
+let prevAlive = null;       // snapshot of the PREVIOUS run's heartbeat, taken at launch
+let reconciledStartup = false;
+function snapshotPrevAlive() {
+  try { prevAlive = JSON.parse(fs.readFileSync(aliveFile(), "utf8")); } catch { /* first run */ }
+  writeAlive(); // fresh heartbeat for this run (safe: prev is snapshotted)
+}
+async function reconcileOfflineGap() {
+  if (reconciledStartup) return;
+  reconciledStartup = true;
+  const prev = prevAlive;
+  if (!prev || typeof prev.t !== "number") return;
+  const st = punch.state();
+  if (st.status === "out") return;
+  // Anchor at the lock moment if the machine was locked when it went dark,
+  // else the last heartbeat. Never before the session started.
+  const anchor = typeof prev.lockedAt === "number" ? Math.min(prev.lockedAt, prev.t) : prev.t;
+  const graceMs = (globalState.punchLockMin ?? 45) * 60000;
+  const away = Date.now() - anchor;
+  if (away > graceMs && st.in && anchor > st.in) {
+    await punch.act("outAt", { outAtMs: anchor, lock: true }).catch(() => {});
+    new Notification({
+      title: "S&S Desk clocked you out",
+      body: `This Mac went offline ~${Math.round(away / 60000)} min ago while clocked in — clocked out retroactively at that point. Fix it on the Time page if that's wrong.`,
+    }).show();
+    pushState();
+  }
+}
 let updateReady = null; // version string once an update is downloaded and staged
 let manualUpdateCheck = false; // true while a user-triggered "check now" is in flight
 
@@ -233,7 +271,7 @@ function onAuthed(body) {
     clientProjects: globalState.clientProjects ?? {},
     budget: globalState.budget ?? null,
   };
-  punch.sync().then(() => drainAll());
+  punch.sync().then(() => { reconcileOfflineGap(); drainAll(); });
   if (leaveWatch) leaveWatch.poll();
   // Per-client project registry (managers define it in S&S) — powers the
   // project picker. Refreshed on each auth so new projects appear live.
@@ -426,6 +464,7 @@ if (!app.requestSingleInstanceLock()) app.quit();
 
 app.whenReady().then(() => {
   if (app.dock) app.dock.hide();
+  snapshotPrevAlive();
 
   // Squirrel can only update an app it can replace. A copy running from
   // Downloads / a DMG / a homemade startup folder gets translocated by
@@ -582,10 +621,11 @@ app.whenReady().then(() => {
   // Lock / sleep safety net: away longer than the manager-set grace while
   // clocked in → retroactive clock-out at the moment the machine locked,
   // flagged auto (same `outAt` + "lock" contract as the Chrome extension).
-  const onAway = () => { lockedAt = Date.now(); tracker.flush(); };
+  const onAway = () => { lockedAt = Date.now(); tracker.flush(); writeAlive(); };
   const onReturn = () => {
     const away = lockedAt ? Date.now() - lockedAt : 0;
     lockedAt = null;
+    writeAlive();
     if (away > globalState.punchLockMin * 60_000 && punch.state().status !== "out") {
       const at = Date.now() - away;
       punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
@@ -602,6 +642,28 @@ app.whenReady().then(() => {
   powerMonitor.on("suspend", onAway);
   powerMonitor.on("unlock-screen", onReturn);
   powerMonitor.on("resume", onReturn);
+
+  // Idle WITHOUT locking: clocked in, screen unlocked, but no input past the
+  // manager-set grace → retroactive clock-out at the moment idle began.
+  // Breaks are exempt (being idle on a break is the point of a break).
+  setInterval(() => {
+    try {
+      if (punch.state().status !== "in" || lockedAt) return;
+      const idleS = powerMonitor.getSystemIdleTime();
+      const graceS = (globalState.punchLockMin ?? 45) * 60;
+      if (idleS < graceS) return;
+      const at = Date.now() - idleS * 1000;
+      punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
+        new Notification({
+          title: "S&S Desk clocked you out",
+          body: `Idle ${Math.round(idleS / 60)} min — clocked out retroactively at the moment you went idle. Fix it on the Time page if that's wrong.`,
+        }).show();
+        pushState();
+      }).catch(() => {});
+    } catch { /* next tick */ }
+  }, 60_000);
+  // Persist the proof-of-life heartbeat every minute (see reconcileOfflineGap).
+  setInterval(writeAlive, 60_000);
 
   app.on("before-quit", () => tracker.stop());
   // SIGTERM (pkill, shutdown) doesn't reliably reach before-quit — flush the

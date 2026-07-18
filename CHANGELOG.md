@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.31 — 2026-07-18
+
+- **The clock can no longer run on a dead machine.** Three safety nets:
+  powering off / crashing while clocked in now clocks you out retroactively at
+  the last moment your Mac was alive (or at the lock, if it was locked) the
+  next time Desk starts; going idle for longer than the grace period without
+  locking clocks you out back at the moment you went idle (breaks exempt); and
+  the server now watches Desk's heartbeat, so a session left open by a machine
+  that never comes back closes itself and shows correctly on every device.
+
 ## 0.1.30 — 2026-07-18
 
 - **You only see clients you're assigned to.** The client dropdown now shows
