@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.28 — 2026-07-17
+
+- **Project lists follow your allocations.** When management has allocated you
+  hours on specific projects for a client, the project dropdown shows only
+  those; clients where you have no project allocations still show the full
+  list. Bill what you're budgeted for.
+- **Server rejections no longer stick.** If the server refuses a clock action
+  (for example, a client that requires a project), Desk now shows the reason in
+  the panel and rolls back, instead of silently retrying forever — and the
+  offline replay queue drops permanently-rejected actions rather than letting
+  one block everything behind it.
+
 ## 0.1.27 — 2026-07-17
 
 - **Projects are now required where they exist.** If a client has projects

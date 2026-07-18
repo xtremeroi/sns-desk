@@ -25,8 +25,14 @@ function selectedClient() {
 function selectedProject() {
   return $("project").value || null;
 }
+// Billable projects for a client: the employee's ALLOCATED projects when they
+// have any (only bill what management gave you hours on); otherwise the full
+// client registry, so unallocated-but-legit work isn't dead-ended.
 function clientProjects(clientId) {
-  return (clientId && state && state.clientProjects) ? (state.clientProjects[clientId] ?? []) : [];
+  if (!clientId || !state) return [];
+  const allocated = (state.allocProjects ?? {})[clientId] ?? [];
+  if (allocated.length) return [...new Set(allocated)];
+  return (state.clientProjects ?? {})[clientId] ?? [];
 }
 // Fill the project dropdown from the selected client's registry. Hidden when
 // the client (or General) has no projects defined. keepValue preserves the

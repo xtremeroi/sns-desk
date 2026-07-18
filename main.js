@@ -307,6 +307,25 @@ function writeWidgetState() {
   if (reloadKey !== lastReloadKey) { lastReloadKey = reloadKey; reloadWidgets(); }
 }
 
+// The signed-in employee's ALLOCATED projects per client, parsed from their
+// weekly budget lines (ids look like "clientId::Project"). The renderer
+// prefers this over the full registry so people only bill projects management
+// actually allocated them hours on; falls back to the registry when a client
+// has no project-level allocations for this person.
+function allocatedProjectsByClient() {
+  const map = {};
+  for (const it of globalState.budget?.items ?? []) {
+    const id = String(it.id ?? "");
+    const sep = id.indexOf("::");
+    if (sep <= 0) continue;
+    const cid = id.slice(0, sep);
+    const proj = id.slice(sep + 2);
+    if (!proj) continue;
+    (map[cid] ??= []).push(proj);
+  }
+  return map;
+}
+
 function pushState() {
   updateTray();
   writeWidgetState();
@@ -319,6 +338,7 @@ function pushState() {
     actor: globalState.actor,
     roster: globalState.roster,
     clientProjects: globalState.clientProjects,
+    allocProjects: allocatedProjectsByClient(),
     punch: punch.state(),
     workedMsToday: punch.workedMsToday(),
     sessionMs: punch.sessionMs(),
@@ -567,6 +587,9 @@ async function quitFlow() {
 // ── IPC ─────────────────────────────────────────────────────────────────────
 ipcMain.handle("punch", async (_e, action, opts) => {
   const res = await punch.act(action, opts ?? {});
+  // Server-side validation rejections (e.g. "client requires a project") show
+  // in the panel header, since the optimistic UI change just got rolled back.
+  if (res && res.rejected && res.error) sendUpdateStatus(String(res.error).slice(0, 80), "warn");
   pushState();
   return res;
 });
