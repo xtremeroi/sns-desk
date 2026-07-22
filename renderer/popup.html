@@ -114,6 +114,15 @@
     <span>Session expired — sign in to sync.</span>
     <button id="loginBtn">Sign in</button>
   </div>
+  <div class="banner" id="autoout" style="display:none">
+    <div style="flex:1; min-width:0">
+      <div id="autooutMsg"></div>
+      <div style="font-size:10px; opacity:.75; margin-top:2px">Time was kept up to that point — fix it on the Time page if it's wrong.</div>
+    </div>
+    <button id="autooutIn">Clock back in</button>
+    <button id="autooutX" title="Dismiss"
+      style="margin-left:6px; background:none; border:none; color:inherit; opacity:.7; font-size:13px; cursor:pointer; padding:2px 4px">✕</button>
+  </div>
   <div class="pill">
     <div class="ticker out" id="ticker">Clocked out</div>
     <div class="sub" id="sub"></div>

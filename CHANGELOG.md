@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.32 — 2026-07-22
+
+- **A clear "you've been clocked out" message.** Every automatic clock-out
+  (idle, screen locked too long, Mac went offline, or S&S closing a dead
+  session) now shows a persistent banner in the panel saying when and why you
+  were clocked out, with a one-click "Clock back in" that restores your
+  previous client and project. The macOS notification now opens the panel when
+  clicked instead of being a dead toast, and the banner survives a Desk
+  restart until you act on it.
+
 ## 0.1.31 — 2026-07-18
 
 - **The clock can no longer run on a dead machine.** Three safety nets:

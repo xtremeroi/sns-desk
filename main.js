@@ -60,13 +60,44 @@ async function reconcileOfflineGap() {
   const away = Date.now() - anchor;
   if (away > graceMs && st.in && anchor > st.in) {
     await punch.act("outAt", { outAtMs: anchor, lock: true }).catch(() => {});
-    new Notification({
-      title: "S&S Desk clocked you out",
-      body: `This Mac went offline ~${Math.round(away / 60000)} min ago while clocked in — clocked out retroactively at that point. Fix it on the Time page if that's wrong.`,
-    }).show();
+    raiseAutoOut("offline", anchor, { client: st.client, project: st.project });
+    notifyAutoOut("Clocked out — Mac was offline", `This Mac went offline while clocked in, so you were clocked out back at that point. Click to reopen Desk — one click clocks you back in.`);
     pushState();
   }
 }
+// ── Auto-clock-out banner ───────────────────────────────────────────────────
+// macOS notifications are missable (transient, often muted), so every automatic
+// clock-out ALSO raises a persistent banner in the panel: when, why, and a
+// one-click "Clock back in" with the previous client/project prefilled.
+// Persisted in settings so a Desk restart doesn't eat the message; cleared on
+// any clock-in or explicit dismiss.
+let autoOut = null; // { reason: idle|away|offline|server, outAt, minutes, client, project }
+function raiseAutoOut(reason, outAtMs, extra = {}) {
+  autoOut = {
+    reason,
+    outAt: outAtMs,
+    minutes: extra.minutes ?? null,
+    client: extra.client ?? null,
+    project: extra.project ?? null,
+  };
+  writeSettings({ ...readSettings(), autoOut });
+  pushState();
+}
+function clearAutoOut() {
+  if (!autoOut) return;
+  autoOut = null;
+  const s = readSettings();
+  delete s.autoOut;
+  writeSettings(s);
+}
+// Notification that opens the panel when clicked (where the banner is waiting),
+// instead of being a dead toast.
+function notifyAutoOut(title, body) {
+  const n = new Notification({ title, body });
+  n.on("click", () => { if (popup && !popup.isVisible()) togglePopup(); });
+  n.show();
+}
+
 let updateReady = null; // version string once an update is downloaded and staged
 let manualUpdateCheck = false; // true while a user-triggered "check now" is in flight
 
@@ -395,6 +426,8 @@ function assignedClientIds() {
 }
 
 function pushState() {
+  // Clocking back in (any path) retires the auto-out banner.
+  if (autoOut && punch && punch.state().status !== "out") clearAutoOut();
   updateTray();
   writeWidgetState();
   if (!popup || popup.isDestroyed() || !popup.isVisible()) return;
@@ -406,6 +439,7 @@ function pushState() {
     actor: globalState.actor,
     roster: globalState.roster,
     isManager: !!globalState.isManager,
+    autoOut,
     assignedClients: assignedClientIds(),
     clientProjects: globalState.clientProjects,
     allocProjects: allocatedProjectsByClient(),
@@ -465,6 +499,7 @@ if (!app.requestSingleInstanceLock()) app.quit();
 app.whenReady().then(() => {
   if (app.dock) app.dock.hide();
   snapshotPrevAlive();
+  autoOut = readSettings().autoOut ?? null;
 
   // Squirrel can only update an app it can replace. A copy running from
   // Downloads / a DMG / a homemade startup folder gets translocated by
@@ -503,6 +538,13 @@ app.whenReady().then(() => {
   }
 
   punch = new Punch(app.getPath("userData"), () => updateTray());
+  // The server closed a session we thought was open (dead-machine watchdog,
+  // 12h cap) — surface it, unless a local watchdog already raised the banner.
+  punch.onAutoClosedRemotely = (info) => {
+    if (autoOut) return;
+    raiseAutoOut("server", info.outAt, { client: info.client, project: info.project });
+    notifyAutoOut("Clocked out by S&S", "S&S closed your session after this Mac stopped responding. Click to reopen Desk — one click clocks you back in.");
+  };
   // Notify the employee when a manager approves or denies their PTO. Clicking
   // the notification opens the Time page.
   leaveWatch = new LeaveWatch(app.getPath("userData"), (title, body) => {
@@ -628,11 +670,10 @@ app.whenReady().then(() => {
     writeAlive();
     if (away > globalState.punchLockMin * 60_000 && punch.state().status !== "out") {
       const at = Date.now() - away;
+      const stBefore = punch.state();
       punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
-        new Notification({
-          title: "S&S Desk clocked you out",
-          body: `Away ${Math.round(away / 60000)} min — clocked out retroactively at lock time. Fix it on the Time page if that's wrong.`,
-        }).show();
+        raiseAutoOut("away", at, { minutes: Math.round(away / 60000), client: stBefore.client, project: stBefore.project });
+        notifyAutoOut("Clocked out — away", `Away ${Math.round(away / 60000)} min, so you were clocked out back at the moment this Mac locked. Click to reopen Desk — one click clocks you back in.`);
         pushState();
       });
     }
@@ -653,11 +694,10 @@ app.whenReady().then(() => {
       const graceS = (globalState.punchLockMin ?? 45) * 60;
       if (idleS < graceS) return;
       const at = Date.now() - idleS * 1000;
+      const stBefore = punch.state();
       punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
-        new Notification({
-          title: "S&S Desk clocked you out",
-          body: `Idle ${Math.round(idleS / 60)} min — clocked out retroactively at the moment you went idle. Fix it on the Time page if that's wrong.`,
-        }).show();
+        raiseAutoOut("idle", at, { minutes: Math.round(idleS / 60), client: stBefore.client, project: stBefore.project });
+        notifyAutoOut("Clocked out — inactivity", `Idle ${Math.round(idleS / 60)} min, so you were clocked out back at the moment you went idle. Click to reopen Desk — one click clocks you back in.`);
         pushState();
       }).catch(() => {});
     } catch { /* next tick */ }
@@ -704,6 +744,7 @@ async function quitFlow() {
 }
 
 // ── IPC ─────────────────────────────────────────────────────────────────────
+ipcMain.handle("autoout-dismiss", () => { clearAutoOut(); pushState(); });
 ipcMain.handle("punch", async (_e, action, opts) => {
   const res = await punch.act(action, opts ?? {});
   // Server-side validation rejections (e.g. "client requires a project") show

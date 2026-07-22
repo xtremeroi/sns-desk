@@ -69,6 +69,12 @@ function render() {
   const p = state.punch;
 
   $("ver").textContent = state.version ? `v${state.version}` : "";
+
+  // Auto-clock-out banner: shown while clocked out with an unacknowledged
+  // automatic clock-out; states when + why, one click clocks back in.
+  const ao = state.autoOut;
+  $("autoout").style.display = ao && p.status === "out" ? "flex" : "none";
+  if (ao) $("autooutMsg").textContent = aoMessage(ao);
   $("pin").classList.toggle("on", !!state.pinned);
   $("pin").title = state.pinned ? "Unpin (stop floating above other windows)" : "Pin on top of other windows";
   $("who").textContent = state.actor ?? "";
@@ -271,6 +277,31 @@ setInterval(() => {
   $("ticker").textContent = fmtHMS(tickBase.todayMs + d);
   renderSub(tickBase.todayMs + d, tickBase.sessionMs + d);
 }, 1000);
+
+// "3:42 PM", plus a weekday when it wasn't today ("6:15 PM Mon").
+function fmtClock(ms) {
+  const d = new Date(ms);
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  const day = new Date().toDateString() === d.toDateString() ? "" : ` ${d.toLocaleDateString(undefined, { weekday: "short" })}`;
+  return `${h}:${m} ${ap}${day}`;
+}
+function aoMessage(ao) {
+  const t = fmtClock(ao.outAt);
+  const mins = ao.minutes ? ` for ${ao.minutes} minutes` : "";
+  if (ao.reason === "idle") return `Clocked out at ${t} — idle${mins}.`;
+  if (ao.reason === "away") return `Clocked out at ${t}, when this Mac locked — away${mins}.`;
+  if (ao.reason === "offline") return `Clocked out at ${t} — this Mac went offline while clocked in.`;
+  return `Clocked out at ${t} — S&S closed the session after this Mac stopped responding.`;
+}
+$("autooutIn").onclick = () => {
+  const ao = state?.autoOut;
+  if (!ao) return;
+  act("in", { client: ao.client ?? undefined, project: ao.project ?? undefined });
+};
+$("autooutX").onclick = () => sns.autoOutDismiss();
 
 // After a client/project switch, clear the field and focus it for a fresh note.
 function promptNote() {
