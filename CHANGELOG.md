@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.33 — 2026-07-22
+
+- **Managers now see every registry project.** The project dropdown was
+  applying the employee allocation filter to managers too, hiding newly added
+  registry projects (only your own allocated ones showed). Managers get the
+  full project list for every client; employee behavior is unchanged —
+  allocated projects only, full list when they have no project allocations.
+
 ## 0.1.32 — 2026-07-22
 
 - **A clear "you've been clocked out" message.** Every automatic clock-out
