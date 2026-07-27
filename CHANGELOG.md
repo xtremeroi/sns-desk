@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.45 — 2026-07-27
+
+- **Weekly progress reads like a clock, not a spreadsheet.** "0.4/3h" is now
+  "24m/3h" — worked and allocated hours everywhere in the weekly widgets (and
+  the website's weekly card) show as hours and minutes, matching the daily
+  views. Requested by Tristan, seconded by Phoenix.
+
 ## 0.1.44 — 2026-07-27
 
 - **Widgets track the live clock much faster.** The clock-state widgets

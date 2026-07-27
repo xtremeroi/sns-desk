@@ -232,7 +232,7 @@ private struct BudgetRow: View {
                 HStack(spacing: 6) {
                     Text(item.n).font(.system(size: 12)).foregroundStyle(SNS.text).lineLimit(1)
                     Spacer(minLength: 4)
-                    Text("\(fmtHours(item.worked))/\(fmtHours(item.alloc))h")
+                    Text("\(fmtHours(item.worked))/\(fmtHours(item.alloc))")
                         .font(.system(size: 10, design: .monospaced)).foregroundStyle(SNS.dim)
                     Text("\(item.pct)%")
                         .font(.system(size: 11, weight: .semibold, design: .monospaced))

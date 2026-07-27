@@ -77,9 +77,14 @@ func fmtHMS(_ ms: Double) -> String {
     return String(format: "%d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
 }
 
-// hours -> "6.2" or "10"
+// hours -> clock-style "24m", "2h", "1h 05m" — people read time as time,
+// not decimals (Tristan/Phoenix 2026-07-27).
 func fmtHours(_ h: Double) -> String {
-    h == h.rounded() ? "\(Int(h))" : String(format: "%.1f", h)
+    let totalM = max(0, Int((h * 60).rounded()))
+    let hrs = totalM / 60, m = totalM % 60
+    if hrs == 0 { return "\(m)m" }
+    if m == 0 { return "\(hrs)h" }
+    return "\(hrs)h \(String(format: "%02d", m))m"
 }
 
 // Weekly-progress bar color by budget status.
