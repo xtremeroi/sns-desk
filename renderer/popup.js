@@ -119,6 +119,10 @@ function render() {
   if (p.status !== "out" && p.project) $("project").value = p.project;
 
   // Ticker (DAY total — continuous across client switches) + session subline.
+  // Body state class drives the HUD skin's monochrome color (and is harmless
+  // for the classic skin).
+  document.body.classList.remove("st-in", "st-break", "st-out");
+  document.body.classList.add(`st-${p.status}`);
   const t = $("ticker");
   if (p.status === "out") {
     t.className = "ticker out";
@@ -424,3 +428,20 @@ $("timepage").onclick = () => sns.openTimePage();
 
 sns.onState((s) => { state = s; render(); });
 sns.refresh();
+
+// ── Skin ────────────────────────────────────────────────────────────────────
+// "classic" (glassy navy) or "hud" (transparent AR-terminal, state-colored).
+// Stored locally per Mac; main is told so it can drop the vibrancy blur —
+// a blurred backdrop would defeat "completely transparent".
+function applySkin(skin) {
+  document.body.classList.toggle("hud", skin === "hud");
+  if (sns.setSkin) sns.setSkin(skin);
+}
+let skin = "classic";
+try { skin = localStorage.getItem("skin") ?? "classic"; } catch { /* default */ }
+applySkin(skin);
+$("skin").onclick = () => {
+  skin = skin === "hud" ? "classic" : "hud";
+  try { localStorage.setItem("skin", skin); } catch { /* session-only */ }
+  applySkin(skin);
+};

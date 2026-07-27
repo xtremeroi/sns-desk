@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.36 — 2026-07-27
+
+- **HUD skin.** Click the ◧ button in the panel header to switch to a fully
+  transparent "AR terminal" look: thin glowing outline boxes, segmented
+  digital digits, and the whole panel tinted by your clock state — green
+  clocked in, amber on break, red clocked out. In HUD mode the panel is a
+  true heads-up display: pinned above every window, on every Space, visible
+  even over full-screen apps. Click ◧ again for the classic glassy look.
+  Per-Mac preference.
+
 ## 0.1.35 — 2026-07-26
 
 - **Optional Dock mode.** Right-click the menu bar icon and turn on "Show in

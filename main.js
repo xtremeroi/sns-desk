@@ -281,11 +281,13 @@ function createPopup() {
     fullscreenable: false,
     skipTaskbar: true,
     transparent: true,
-    vibrancy: "under-window",
+    // HUD skin wants a truly transparent panel; vibrancy would frost it.
+    ...(readSettings().skin === "hud" ? {} : { vibrancy: "under-window" }),
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true },
   });
   popup.loadFile(path.join(__dirname, "renderer", "popup.html"));
-  if (readSettings().pinnedOnTop) popup.setAlwaysOnTop(true, "floating");
+  if (readSettings().skin === "hud") applyHudPresence(true);
+  else if (readSettings().pinnedOnTop) popup.setAlwaysOnTop(true, "floating");
   const saveBounds = () => {
     const s = readSettings();
     s.popupBounds = popup.getBounds();
@@ -848,6 +850,26 @@ ipcMain.handle("toggle-mini", () => {
     const height = Math.min(Math.max(s.preMiniHeight ?? 584, 440), wa.height);
     const y = Math.min(Math.max(b.y, wa.y), wa.y + wa.height - height);
     popup.setBounds({ x: b.x, y, width: b.width, height });
+  }
+});
+// HUD skin is a heads-up display: pinned above ALL other windows, on every
+// Space, visible even over full-screen apps. Classic restores the user's own
+// pin preference.
+function applyHudPresence(hud) {
+  if (!popup || popup.isDestroyed()) return;
+  if (hud) {
+    popup.setAlwaysOnTop(true, "screen-saver");
+    popup.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  } else {
+    popup.setVisibleOnAllWorkspaces(false);
+    popup.setAlwaysOnTop(!!readSettings().pinnedOnTop, "floating");
+  }
+}
+ipcMain.handle("set-skin", (_e, skin) => {
+  writeSettings({ ...readSettings(), skin: String(skin ?? "classic") });
+  if (popup && !popup.isDestroyed()) {
+    popup.setVibrancy(skin === "hud" ? null : "under-window");
+    applyHudPresence(skin === "hud");
   }
 });
 ipcMain.handle("toggle-pin", () => {

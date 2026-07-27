@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("sns", {
   checkUpdate: () => ipcRenderer.invoke("check-update"),
   autoOutDismiss: () => ipcRenderer.invoke("autoout-dismiss"),
   togglePin: () => ipcRenderer.invoke("toggle-pin"),
+  setSkin: (skin) => ipcRenderer.invoke("set-skin", skin),
   toggleMini: () => ipcRenderer.invoke("toggle-mini"),
   dragStart: () => ipcRenderer.invoke("drag-start"),
   dragEnd: () => ipcRenderer.invoke("drag-end"),
