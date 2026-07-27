@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.39 — 2026-07-27
+
+- **Dock timer actually shows now.** Turning on "Show in Dock with timer"
+  raced the Dock tile's creation, so macOS silently dropped the badge — the
+  badge is now asserted after the tile exists and re-asserted continuously.
+- **Menu spelling: "S&S Desk", not "SS Desk"** (the menu system was eating
+  the ampersand).
+
 ## 0.1.38 — 2026-07-27
 
 - **HUD skin: defined lines on any background.** Borders draw at full

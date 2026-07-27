@@ -173,11 +173,14 @@ function trayIconFor(status) {
 // Opt-in Dock presence: the app icon appears in the Dock (and Cmd-Tab) with
 // a badge carrying the day's worked time — "3:42", "II 3:42" on break, clear
 // when clocked out. Toggled from the tray menu, persisted in settings.
-let lastBadge = null;
-function applyDockMode() {
+async function applyDockMode() {
   if (!app.dock) return;
-  if (readSettings().dockTimer) app.dock.show();
-  else { app.dock.setBadge(""); lastBadge = null; app.dock.hide(); }
+  if (readSettings().dockTimer) {
+    // dock.show() is async — a badge set before the tile exists is silently
+    // dropped by macOS. Await the tile, then assert the badge immediately.
+    await app.dock.show();
+    updateDockBadge(punch ? punch.state() : { status: "out" });
+  } else { app.dock.setBadge(""); app.dock.hide(); }
 }
 function fmtHM(ms) {
   const m = Math.floor(ms / 60000);
@@ -188,7 +191,9 @@ function updateDockBadge(st) {
   const badge = st.status === "in" ? fmtHM(punch.workedMsToday())
     : st.status === "break" ? `II ${fmtHM(punch.workedMsToday())}`
     : "";
-  if (badge !== lastBadge) { lastBadge = badge; app.dock.setBadge(badge); }
+  // Re-assert every tick, no change-cache: macOS occasionally drops badge
+  // sets around tile creation/space changes, and the setter is trivially cheap.
+  app.dock.setBadge(badge);
 }
 
 let trayStatus = null;
@@ -608,7 +613,7 @@ app.whenReady().then(() => {
   // Right-click = the conventional menu-bar-app menu, with an unambiguous Quit.
   tray.on("right-click", () => {
     tray.popUpContextMenu(Menu.buildFromTemplate([
-      { label: "Open S&S Desk", click: () => { if (!popup.isVisible()) togglePopup(); } },
+      { label: "Open S&&S Desk", click: () => { if (!popup.isVisible()) togglePopup(); } },
       // Restarting for an update keeps the punch session running (it lives on
       // the server) — no clock-out prompt, unlike a normal Quit.
       ...(updateReady
@@ -631,7 +636,7 @@ app.whenReady().then(() => {
         },
       },
       { type: "separator" },
-      { label: "Quit S&S Desk (stop tracking)", click: () => quitFlow() },
+      { label: "Quit S&&S Desk (stop tracking)", click: () => quitFlow() },
     ]));
   });
   createPopup();
