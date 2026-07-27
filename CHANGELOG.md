@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.38 — 2026-07-27
+
+- **HUD skin: defined lines on any background.** Borders draw at full
+  strength (with a hairline dark keyline beneath them), the glow is tighter,
+  the clocked-out red is deeper, and secondary text is brighter — the HUD
+  now reads clearly over light wallpapers, not just dark ones.
+
 ## 0.1.37 — 2026-07-27
 
 - **HUD skin rendering fixes.** Text no longer has dark fringes baked around

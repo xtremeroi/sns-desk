@@ -96,18 +96,18 @@
      amber on break, red clocked out. Big digits use DSEG7 (7-segment, OFL
      licensed, bundled). Toggle: the ◧ header button. */
   @font-face { font-family: "DSEG7"; src: url("fonts/DSEG7Classic-Bold.woff2") format("woff2"); }
-  body.hud.st-in    { --hud: #35ff70; --hud-dim: rgba(53,255,112,.55); --hud-soft: rgba(53,255,112,.12); --hud-glow: rgba(53,255,112,.38); }
-  body.hud.st-break { --hud: #ffc233; --hud-dim: rgba(255,194,51,.55); --hud-soft: rgba(255,194,51,.12); --hud-glow: rgba(255,194,51,.38); }
-  body.hud.st-out   { --hud: #ff6255; --hud-dim: rgba(255,98,85,.55);  --hud-soft: rgba(255,98,85,.12);  --hud-glow: rgba(255,98,85,.38); }
+  body.hud.st-in    { --hud: #2bf565; --hud-dim: rgba(43,245,101,.8); --hud-soft: rgba(43,245,101,.14); --hud-glow: rgba(43,245,101,.3); }
+  body.hud.st-break { --hud: #ffb61c; --hud-dim: rgba(255,182,28,.8); --hud-soft: rgba(255,182,28,.14); --hud-glow: rgba(255,182,28,.3); }
+  body.hud.st-out   { --hud: #ff2d1f; --hud-dim: rgba(255,45,31,.8);   --hud-soft: rgba(255,45,31,.14);  --hud-glow: rgba(255,45,31,.3); }
   body.hud {
     --bg: transparent; --card: var(--hud-soft); --edge: var(--hud-dim);
     --text: var(--hud); --dim: var(--hud-dim);
     --green: var(--hud); --amber: var(--hud); --red: var(--hud); --accent: var(--hud);
-    text-shadow: 0 0 7px var(--hud-glow);
+    text-shadow: 0 0 4px var(--hud-glow), 0 1px 1px rgba(0,0,0,.35);
   }
   body.hud, body.hud * { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  body.hud .shell { background: transparent; border: 1px solid var(--hud-dim); border-radius: 10px; box-shadow: 0 0 16px var(--hud-glow); }
-  body.hud .pill { background: transparent; border: 1px solid var(--hud-dim); border-radius: 8px; backdrop-filter: none; box-shadow: none; }
+  body.hud .shell { background: transparent; border: 1.5px solid var(--hud); border-radius: 10px; box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 0 10px var(--hud-glow), inset 0 0 0 1px rgba(0,0,0,.18); }
+  body.hud .pill { background: transparent; border: 1px solid var(--hud); border-radius: 8px; backdrop-filter: none; box-shadow: 0 0 0 1px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.14); }
   body.hud .ticker.in, body.hud .ticker.break { font-family: "DSEG7", ui-monospace, monospace; font-weight: 400; font-size: 26px; letter-spacing: 2px; }
   body.hud select, body.hud input[type=text] { background: rgba(0,0,0,.28); border-color: var(--hud-dim); color: var(--hud); border-radius: 6px; }
   body.hud input::placeholder { color: var(--hud-dim); }
