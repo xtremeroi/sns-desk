@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.49 — 2026-07-27
+
+- **Pick what the menu bar timer counts.** Right-click the menu bar icon →
+  "Menu bar timer": Day total (the default), Current session, or This
+  client/project today (everything billed to the bucket you're clocked into).
+  Requested by Tristan, generalized per Randy.
+- **"SNS" widget search actually works now.** The gallery matches name words
+  by prefix, and "(SNS)" hid the word behind a parenthesis — the entry is now
+  "S&S Desk · SNS", which both spellings find.
+
 ## 0.1.48 — 2026-07-27
 
 - **Optional client label in the menu bar.** Right-click the menu bar icon

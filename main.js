@@ -206,6 +206,23 @@ function updateDockBadge(st) {
 // Opt-in: append the billed client (and project) to the menu bar ticker —
 // "▶ 3:12:49 · Farmers Insurance — Launch site". Off by default; most people
 // want the slim ticker (Randy 2026-07-27).
+// Ticker modes (Tristan asked for session; Randy generalized): "day" = the
+// day total (default), "session" = current session, "bucket" = today's total
+// billed to the client/project you're clocked into right now.
+function trayMode() {
+  const s = readSettings();
+  return s.trayMode ?? (s.traySession ? "session" : "day");
+}
+function trayMs() {
+  const mode = trayMode();
+  if (mode === "session") return punch.sessionMs();
+  if (mode === "bucket") {
+    const st = punch.state();
+    return punch.bucketMsToday(st.client?.id ?? null, st.project ?? null);
+  }
+  return punch.workedMsToday();
+}
+
 function trayClientSuffix(st) {
   if (!readSettings().trayClient || !st.client) return "";
   const label = `${st.client.n}${st.project ? ` — ${st.project}` : ""}`;
@@ -224,8 +241,8 @@ function updateTray() {
   const flag = pend ? " ⇡" : needsLogin || punch.needsLogin ? " ⚠" : "";
   // Tray shows the DAY total, so a client switch never resets the ticker.
   // Clocked out = mark only (no wordmark text), plus any status glyph.
-  if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(punch.workedMsToday())}${trayClientSuffix(st)}${flag}`);
-  else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(punch.workedMsToday())}${trayClientSuffix(st)}${flag}`);
+  if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(trayMs())}${trayClientSuffix(st)}${flag}`);
+  else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(trayMs())}${trayClientSuffix(st)}${flag}`);
   else tray.setTitle(flag.trim());
   updateDockBadge(st);
 }
@@ -656,6 +673,19 @@ app.whenReady().then(() => {
         enabled: app.isPackaged,
         checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
         click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }),
+      },
+      {
+        label: "Menu bar timer",
+        submenu: [
+          { key: "day", label: "Day total" },
+          { key: "session", label: "Current session" },
+          { key: "bucket", label: "This client/project today" },
+        ].map((m) => ({
+          label: m.label,
+          type: "radio",
+          checked: trayMode() === m.key,
+          click: () => { writeSettings({ ...readSettings(), trayMode: m.key }); updateTray(); },
+        })),
       },
       {
         label: "Show client in menu bar",
