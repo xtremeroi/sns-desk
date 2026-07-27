@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.42 — 2026-07-27
+
+- **No more white bar under the HUD.** System scrollbars were painting as
+  opaque white pills on the transparent panel (bottom edge in mini mode, and
+  the app list's scrollbar). Horizontal bars are gone entirely; the app list
+  scrollbar is now a thin state-colored sliver.
+
 ## 0.1.41 — 2026-07-27
 
 - **Dock icon colors fixed.** The timer digits now actually turn amber on

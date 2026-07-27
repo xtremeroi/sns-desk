@@ -20,7 +20,12 @@
   html, body { background: transparent; height: 100%; }
   /* Transparent windows + subpixel AA = dark fringes baked around glyphs
      (Chromium assumes an opaque backdrop). Grayscale AA renders clean. */
-  body { -webkit-font-smoothing: antialiased; }
+  body { -webkit-font-smoothing: antialiased; overflow: hidden; }
+  /* Scrollbars paint as opaque white pills on a transparent window — restyle
+     the one legitimate bar (the app list) and forbid horizontal ones. */
+  ::-webkit-scrollbar { width: 6px; height: 0; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22); border-radius: 3px; }
   body { color: var(--text); font-size: 13px; padding: 10px; }
   .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; height: 100%; }
   /* The header is the drag handle — manual drag via IPC, because CSS
@@ -122,6 +127,7 @@
   body.hud .link { color: var(--hud); text-decoration: underline; }
   body.hud .syncmsg, body.hud .syncmsg.warn, body.hud .pendbadge, body.hud .quitbtn:hover { color: var(--hud); }
   body.hud ::selection { background: var(--hud-soft); }
+  body.hud ::-webkit-scrollbar-thumb { background: var(--hud-dim); }
 </style>
 </head>
 <body>
