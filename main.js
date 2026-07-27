@@ -179,21 +179,28 @@ async function applyDockMode() {
     // dock.show() is async — a badge set before the tile exists is silently
     // dropped by macOS. Await the tile, then assert the badge immediately.
     await app.dock.show();
-    updateDockBadge(punch ? punch.state() : { status: "out" });
-  } else { app.dock.setBadge(""); app.dock.hide(); }
+    lastDockKey = null;
+    if (punch) updateDockBadge(punch.state());
+  } else { lastDockKey = null; app.dock.hide(); }
 }
 function fmtHM(ms) {
   const m = Math.floor(ms / 60000);
   return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
 }
+// macOS refuses to RENDER dock badges for LSUIElement apps promoted into the
+// Dock (setBadge lands, nothing shows — confirmed on 0.1.39). So Dock mode
+// draws the day total into the ICON as 7-segment digits, colored by state.
+let lastDockKey = null;
 function updateDockBadge(st) {
   if (!app.dock || !readSettings().dockTimer) return;
-  const badge = st.status === "in" ? fmtHM(punch.workedMsToday())
-    : st.status === "break" ? `II ${fmtHM(punch.workedMsToday())}`
-    : "";
-  // Re-assert every tick, no change-cache: macOS occasionally drops badge
-  // sets around tile creation/space changes, and the setter is trivially cheap.
-  app.dock.setBadge(badge);
+  const timeStr = fmtHM(punch.workedMsToday());
+  const key = `${st.status}|${timeStr}`;
+  if (key === lastDockKey) return;
+  lastDockKey = key;
+  const col = st.status === "in" ? { r: 43, g: 245, b: 101 }
+    : st.status === "break" ? { r: 255, g: 182, b: 28 }
+    : { r: 255, g: 76, b: 62 };
+  try { app.dock.setIcon(require("./lib/dock-icon.js").dockIcon(nativeImage, timeStr, col)); } catch (e) { console.log("[sns-desk] dock icon:", e?.message); }
 }
 
 let trayStatus = null;
@@ -480,6 +487,7 @@ function pushState() {
     clientProjects: globalState.clientProjects,
     allocProjects: allocatedProjectsByClient(),
     punch: punch.state(),
+    breakUntil: timedBreakUntil,
     workedMsToday: punch.workedMsToday(),
     sessionMs: punch.sessionMs(),
     clientsToday: punch.clientTotalsToday(),
@@ -799,7 +807,25 @@ async function quitFlow() {
 
 // ── IPC ─────────────────────────────────────────────────────────────────────
 ipcMain.handle("autoout-dismiss", () => { clearAutoOut(); pushState(); });
+// Timed break ("Break 10m"): a normal break that auto-resumes when the timer
+// lapses. Any other clock action cancels the timer; the pending until-time
+// rides pushState so the panel can show a countdown.
+let timedBreakUntil = null;
+setInterval(() => {
+  try {
+    if (!timedBreakUntil || Date.now() < timedBreakUntil) return;
+    timedBreakUntil = null;
+    if (punch.state().status !== "break") return;
+    punch.act("resume").then(() => {
+      new Notification({ title: "Break's over", body: "You're clocked back in — the timed break ended." }).show();
+      pushState();
+    }).catch(() => {});
+  } catch { /* next tick */ }
+}, 15_000);
+
 ipcMain.handle("punch", async (_e, action, opts) => {
+  if (action === "break" && opts && Number(opts.minutes) > 0) timedBreakUntil = Date.now() + Number(opts.minutes) * 60000;
+  else timedBreakUntil = null;
   const res = await punch.act(action, opts ?? {});
   // Server-side validation rejections (e.g. "client requires a project") show
   // in the panel header, since the optimistic UI change just got rolled back.

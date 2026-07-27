@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.40 — 2026-07-27
+
+- **"10" break button.** Next to Break there's a one-click capped break:
+  clocks you onto break and automatically resumes you after 10 minutes —
+  breaks can't run long by accident. Countdown shows in the panel, a
+  notification fires when you're back on the clock, and resuming early or
+  clocking out cancels the timer.
+- **Dock timer moved into the icon itself.** macOS refuses to render badge
+  bubbles for menu-bar apps shown in the Dock, so Dock mode now draws the
+  day's time as 7-segment digits on the app icon — green clocked in, amber
+  on break, red clocked out. Same look as the HUD skin.
+
 ## 0.1.39 — 2026-07-27
 
 - **Dock timer actually shows now.** Turning on "Show in Dock with timer"

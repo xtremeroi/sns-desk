@@ -135,6 +135,9 @@ function render() {
     tickBase = { todayMs: state.workedMsToday, sessionMs: state.sessionMs, at: Date.now(), frozen: p.status === "break" };
     t.textContent = fmtHMS(state.workedMsToday);
     renderSub(state.workedMsToday, state.sessionMs);
+    if (p.status === "break" && state.breakUntil && state.breakUntil > Date.now()) {
+      $("sub").textContent += ` · resumes in ${Math.max(1, Math.ceil((state.breakUntil - Date.now()) / 60000))}m`;
+    }
     // Always editable while clocked in — change what you're working on anytime,
     // no client/project switch needed. Sync the field to the saved note only
     // when you're not actively typing in it, so pushes don't clobber your edit.
@@ -164,8 +167,10 @@ function render() {
       $("note").value = "";
     });
   } else {
-    if (p.status === "in") mk("Break", "warn", () => act("break"));
-    else mk("Resume", "primary", () => act("resume"));
+    if (p.status === "in") {
+      mk("Break", "warn", () => act("break"));
+      mk("10", "warn", () => act("break", { minutes: 10 }));
+    } else mk("Resume", "primary", () => act("resume"));
     mk("Clock out", "stop", () => act("out"));
   }
 
