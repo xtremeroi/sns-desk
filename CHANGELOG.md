@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.41 — 2026-07-27
+
+- **Dock icon colors fixed.** The timer digits now actually turn amber on
+  break and red when clocked out — a color-channel bug made amber render as
+  pale blue (green happened to survive it, which is why clocked-in looked
+  right).
+
 ## 0.1.40 — 2026-07-27
 
 - **"10" break button.** Next to Break there's a one-click capped break:
