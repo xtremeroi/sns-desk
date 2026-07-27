@@ -19,6 +19,25 @@ exports.default = async function afterSign(context) {
   const appName = context.packager.appInfo.productFilename; // "S&S Desk"
   const appPath = path.join(context.appOutDir, `${appName}.app`);
   const appexSrc = path.join(projectDir, "build", "widget-ext", "SNSDeskWidgetsExtension.appex");
+  // Staleness guard: the staged appex is only refreshed by `npm run
+  // widget:appex` — an EMBED_WIDGET build must NOT silently ship an old
+  // widget when the Swift sources are newer (it happened: 0.1.35–0.1.45
+  // announced widget changes that never left the repo).
+  {
+    const newestSwift = (dir) => {
+      let t = 0;
+      for (const f of fs.readdirSync(dir)) {
+        const fp = path.join(dir, f);
+        const st = fs.statSync(fp);
+        if (st.isDirectory()) t = Math.max(t, newestSwift(fp));
+        else if (f.endsWith(".swift") || f === "Info.plist") t = Math.max(t, st.mtimeMs);
+      }
+      return t;
+    };
+    const srcT = Math.max(newestSwift(path.join(projectDir, "widget", "Widget")), newestSwift(path.join(projectDir, "widget", "Shared")));
+    const binT = fs.statSync(path.join(appexSrc, "Contents", "MacOS", "SNSDeskWidgetsExtension")).mtimeMs;
+    if (srcT > binT) throw new Error("[afterSign] staged widget appex is OLDER than widget sources — run `npm run widget:appex` first");
+  }
   const pluginsDir = path.join(appPath, "Contents", "PlugIns");
   const appexDst = path.join(pluginsDir, "SNSDeskWidgetsExtension.appex");
   const entitlements = path.join(projectDir, "build", "entitlements.mac.plist");

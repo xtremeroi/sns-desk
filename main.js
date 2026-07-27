@@ -203,6 +203,15 @@ function updateDockBadge(st) {
   try { app.dock.setIcon(require("./lib/dock-icon.js").dockIcon(nativeImage, timeStr, col)); } catch (e) { console.log("[sns-desk] dock icon:", e?.message); }
 }
 
+// Opt-in: append the billed client (and project) to the menu bar ticker —
+// "▶ 3:12:49 · Farmers Insurance — Launch site". Off by default; most people
+// want the slim ticker (Randy 2026-07-27).
+function trayClientSuffix(st) {
+  if (!readSettings().trayClient || !st.client) return "";
+  const label = `${st.client.n}${st.project ? ` — ${st.project}` : ""}`;
+  return ` · ${label.length > 30 ? `${label.slice(0, 29)}…` : label}`;
+}
+
 let trayStatus = null;
 function updateTray() {
   if (!tray) return;
@@ -215,8 +224,8 @@ function updateTray() {
   const flag = pend ? " ⇡" : needsLogin || punch.needsLogin ? " ⚠" : "";
   // Tray shows the DAY total, so a client switch never resets the ticker.
   // Clocked out = mark only (no wordmark text), plus any status glyph.
-  if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(punch.workedMsToday())}${flag}`);
-  else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(punch.workedMsToday())}${flag}`);
+  if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(punch.workedMsToday())}${trayClientSuffix(st)}${flag}`);
+  else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(punch.workedMsToday())}${trayClientSuffix(st)}${flag}`);
   else tray.setTitle(flag.trim());
   updateDockBadge(st);
 }
@@ -647,6 +656,12 @@ app.whenReady().then(() => {
         enabled: app.isPackaged,
         checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
         click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }),
+      },
+      {
+        label: "Show client in menu bar",
+        type: "checkbox",
+        checked: !!readSettings().trayClient,
+        click: (item) => { writeSettings({ ...readSettings(), trayClient: item.checked }); updateTray(); },
       },
       {
         label: "Show in Dock with timer",

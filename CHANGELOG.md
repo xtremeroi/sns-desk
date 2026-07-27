@@ -1,9 +1,18 @@
 # Changelog
 
-## 0.1.47 — 2026-07-27
+## 0.1.48 — 2026-07-27
 
+- **Optional client label in the menu bar.** Right-click the menu bar icon
+  and turn on "Show client in menu bar" to see who you're billing next to
+  the ticker — "▶ 3:12:49 · Farmers Insurance — Launch site". Off by
+  default.
 - **Widgets findable by "SNS".** The widget gallery entry is now titled
   "S&S Desk (SNS)", so searching either "S&S" or "SNS" finds the tiles.
+- **Widget improvements actually reach your widgets now.** A build caching
+  bug meant the widget-side changes announced in 0.1.35–0.1.45 (teal
+  over-delivery color, the 60-second refresh, clock-style weekly hours)
+  were compiled but never packaged — this build ships them all, and the
+  build now fails loudly if the widget bundle is ever stale again.
 
 ## 0.1.46 — 2026-07-27
 
