@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.46 — 2026-07-27
+
+- **Header messages stay inside the panel.** Long status messages ("in saved
+  locally — SIGN IN to sync") were overflowing past the border and pushing
+  the header buttons off the panel — they now trim with an ellipsis.
+- **The sign-in banner shows even in mini timer mode.** Being told to sign in
+  with no sign-in button in sight was a trap.
+
 ## 0.1.45 — 2026-07-27
 
 - **Weekly progress reads like a clock, not a spreadsheet.** "0.4/3h" is now

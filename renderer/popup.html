@@ -40,7 +40,8 @@
   .iconbtn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
   .iconbtn:hover { color: var(--text); background: var(--card); }
   .iconbtn.on { color: var(--accent); }
-  .syncmsg { font-size: 10px; color: var(--green); white-space: nowrap; }
+  .syncmsg { font-size: 10px; color: var(--green); white-space: nowrap; min-width: 0; flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; }
+  .hdr .iconbtn { flex: 0 0 auto; }
   .syncmsg.warn { color: var(--amber); }
   @keyframes syncspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .iconbtn.spin { animation: syncspin 0.8s linear infinite; }
@@ -90,7 +91,7 @@
   }
   /* Mini timer (double-click the header): just the ticker + session line. */
   @media (max-height: 219px) {
-    .banner, .pill select, .pill input, .pill .row, .pendbadge { display: none !important; }
+    #autoout, .pill select, .pill input, .pill .row, .pendbadge { display: none !important; }
     .pill { border: none; background: none; padding: 4px 0 0; backdrop-filter: none; box-shadow: none; }
     .ticker.out { padding: 0; }
   }
