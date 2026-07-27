@@ -6,7 +6,12 @@ import WidgetKit
 import Foundation
 
 if #available(macOS 11.0, *) {
-    WidgetCenter.shared.reloadAllTimelines()
+    let kinds = Array(CommandLine.arguments.dropFirst())
+    if kinds.isEmpty {
+        WidgetCenter.shared.reloadAllTimelines()
+    } else {
+        for kind in kinds { WidgetCenter.shared.reloadTimelines(ofKind: kind) }
+    }
 }
 // Let the reload request dispatch to the widget daemon before we exit —
 // exiting too fast can drop the XPC message on the floor.

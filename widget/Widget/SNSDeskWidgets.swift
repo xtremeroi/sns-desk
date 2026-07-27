@@ -9,6 +9,12 @@ struct SNSEntry: TimelineEntry {
 }
 
 struct SNSProvider: TimelineProvider {
+    // Self-refresh cadence. Clock-state widgets re-read the snapshot every
+    // minute so that even when Desk's pushed reloads get deferred (the daily
+    // WidgetKit budget is finite), staleness is capped near a minute. The
+    // slow-moving weekly budget widgets stay at 5 minutes.
+    var refresh: TimeInterval = 60
+
     func placeholder(in context: Context) -> SNSEntry {
         SNSEntry(date: Date(), state: .sample)
     }
@@ -22,10 +28,7 @@ struct SNSProvider: TimelineProvider {
         let state = WidgetState.load() ?? .placeholder
         let entry = SNSEntry(date: Date(), state: state)
         // The live session/day counters tick on-screen via .timer with no wake.
-        // We still re-read the snapshot every few minutes so client names,
-        // per-client totals, and clock state stay fresh.
-        let next = Date().addingTimeInterval(5 * 60)
-        completion(Timeline(entries: [entry], policy: .after(next)))
+        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(refresh))))
     }
 }
 
@@ -85,7 +88,7 @@ struct ClientsWidget: Widget {
 
 struct WeeklyProgressWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "SNSWeeklyProgressWidget", provider: SNSProvider()) { entry in
+        StaticConfiguration(kind: "SNSWeeklyProgressWidget", provider: SNSProvider(refresh: 5 * 60)) { entry in
             WeeklyProgressView(state: entry.state)
                 .widgetURL(snsDeskURL)
                 .containerBackground(for: .widget) { SNSBackground() }
@@ -98,7 +101,7 @@ struct WeeklyProgressWidget: Widget {
 
 struct WeeklyProjectsWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "SNSWeeklyProjectsWidget", provider: SNSProvider()) { entry in
+        StaticConfiguration(kind: "SNSWeeklyProjectsWidget", provider: SNSProvider(refresh: 5 * 60)) { entry in
             WeeklyProgressView(state: entry.state, projectLevel: true)
                 .widgetURL(snsDeskURL)
                 .containerBackground(for: .widget) { SNSBackground() }

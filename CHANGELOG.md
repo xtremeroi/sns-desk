@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.44 — 2026-07-27
+
+- **Widgets track the live clock much faster.** The clock-state widgets
+  (Today, Current Session, Today by Client) now re-read state every minute on
+  their own, capping staleness near a minute even when macOS defers pushed
+  refreshes — and pushes now spend the system's daily refresh allowance only
+  on the widgets a change actually affects, so heavy clock-switching days
+  don't exhaust it. The weekly budget tiles keep their relaxed 5-minute pace.
+
 ## 0.1.43 — 2026-07-27
 
 - **Overstaying a "10" break now says so.** If the capped break lapses and

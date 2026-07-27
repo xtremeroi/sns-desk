@@ -372,10 +372,19 @@ let lastReloadKey = null; // meaningful-state signature; nudge WidgetKit when it
 // so we spawn a tiny signed helper bundled at Contents/MacOS/sns-widget-reload;
 // run from inside the app bundle, its main bundle resolves to Desk so
 // reloadAllTimelines() targets Desk's embedded extension.
-function reloadWidgets() {
+// kinds: targeted reloads spend the WidgetKit budget only on the widgets a
+// transition actually changes; a short debounce collapses rapid toggles.
+let reloadTimer = null, reloadKinds = new Set();
+function reloadWidgets(kinds = []) {
   if (process.platform !== "darwin" || !app.isPackaged) return;
-  const helper = path.join(process.resourcesPath, "..", "MacOS", "sns-widget-reload");
-  try { require("child_process").execFile(helper, [], () => {}); } catch { /* best effort */ }
+  for (const k of kinds) reloadKinds.add(k);
+  if (reloadTimer) return;
+  reloadTimer = setTimeout(() => {
+    const args = [...reloadKinds];
+    reloadTimer = null; reloadKinds.clear();
+    const helper = path.join(process.resourcesPath, "..", "MacOS", "sns-widget-reload");
+    try { require("child_process").execFile(helper, args, () => {}); } catch { /* best effort */ }
+  }, 2500);
 }
 
 // Roll the flat budget lines (client or client::project) up to one row per
@@ -431,7 +440,12 @@ function writeWidgetState() {
   // budget (~dozens/day); once exhausted, macOS defers ALL reloads and the
   // tiles lag exactly when it matters. Budget bars ride the 5-min timeline.
   const reloadKey = `${st.status}|${st.client?.n ?? "General"}|${st.project ?? ""}|${st.note ?? ""}`;
-  if (reloadKey !== lastReloadKey) { lastReloadKey = reloadKey; reloadWidgets(); }
+  if (reloadKey !== lastReloadKey) {
+    lastReloadKey = reloadKey;
+    // Clock/note transitions touch the three state widgets; the weekly budget
+    // pair rides its own slow timeline and is never pushed.
+    reloadWidgets(["SNSTodayWidget", "SNSSessionWidget", "SNSClientsWidget"]);
+  }
 }
 
 // The signed-in employee's ALLOCATED projects per client, parsed from their
