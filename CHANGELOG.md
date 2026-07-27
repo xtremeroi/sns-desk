@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.47 — 2026-07-27
+
+- **Widgets findable by "SNS".** The widget gallery entry is now titled
+  "S&S Desk (SNS)", so searching either "S&S" or "SNS" finds the tiles.
+
 ## 0.1.46 — 2026-07-27
 
 - **Header messages stay inside the panel.** Long status messages ("in saved
