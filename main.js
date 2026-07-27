@@ -59,7 +59,7 @@ async function reconcileOfflineGap() {
   const graceMs = (globalState.punchLockMin ?? 45) * 60000;
   const away = Date.now() - anchor;
   if (away > graceMs && st.in && anchor > st.in) {
-    await punch.act("outAt", { outAtMs: anchor, lock: true }).catch(() => {});
+    await punch.act("outAt", { outAtMs: anchor, lock: true, reason: "off" }).catch(() => {});
     raiseAutoOut("offline", anchor, { client: st.client, project: st.project });
     notifyAutoOut("Clocked out — Mac was offline", `This Mac went offline while clocked in, so you were clocked out back at that point. Click to reopen Desk — one click clocks you back in.`);
     pushState();
@@ -118,6 +118,13 @@ function maybeAutoApplyUpdate() {
   if (!updateReady || !app.isPackaged) return;
   if (punch.state().status !== "out") return;
   if (popup && !popup.isDestroyed() && popup.isVisible()) return;
+  // Never trust a stale local "out". An expired login or dead sync can hide an
+  // open server-side session — restarting then looks like "Desk updated while
+  // I was clocked in and ate my hour" (it happened). Only apply when the clock
+  // state was confirmed against the server recently and nothing is queued.
+  if (needsLogin || punch.needsLogin) return;
+  if (punch.pendingCount() + tracker.pendingCount() > 0) return;
+  if (Date.now() - punch.lastSync > 5 * 60000) return;
   console.log(`[sns-desk] auto-applying staged update ${updateReady} (idle)`);
   tracker.stop();
   autoUpdater.quitAndInstall(true, true); // silent, relaunch after install
@@ -671,7 +678,7 @@ app.whenReady().then(() => {
     if (away > globalState.punchLockMin * 60_000 && punch.state().status !== "out") {
       const at = Date.now() - away;
       const stBefore = punch.state();
-      punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
+      punch.act("outAt", { outAtMs: at, lock: true, reason: "lock" }).then(() => {
         raiseAutoOut("away", at, { minutes: Math.round(away / 60000), client: stBefore.client, project: stBefore.project });
         notifyAutoOut("Clocked out — away", `Away ${Math.round(away / 60000)} min, so you were clocked out back at the moment this Mac locked. Click to reopen Desk — one click clocks you back in.`);
         pushState();
@@ -695,7 +702,7 @@ app.whenReady().then(() => {
       if (idleS < graceS) return;
       const at = Date.now() - idleS * 1000;
       const stBefore = punch.state();
-      punch.act("outAt", { outAtMs: at, lock: true }).then(() => {
+      punch.act("outAt", { outAtMs: at, lock: true, reason: "idle" }).then(() => {
         raiseAutoOut("idle", at, { minutes: Math.round(idleS / 60), client: stBefore.client, project: stBefore.project });
         notifyAutoOut("Clocked out — inactivity", `Idle ${Math.round(idleS / 60)} min, so you were clocked out back at the moment you went idle. Click to reopen Desk — one click clocks you back in.`);
         pushState();
@@ -750,6 +757,18 @@ ipcMain.handle("punch", async (_e, action, opts) => {
   // Server-side validation rejections (e.g. "client requires a project") show
   // in the panel header, since the optimistic UI change just got rolled back.
   if (res && res.rejected && res.error) sendUpdateStatus(String(res.error).slice(0, 80), "warn");
+  // A queued action means the server does NOT know yet — say so loudly instead
+  // of a subtle glyph, and say what unblocks it. Clock-outs especially: people
+  // shut the laptop right after, then the timesheet disagrees with them.
+  if (res && res.queued) {
+    sendUpdateStatus(
+      res.needsLogin ? `${action} saved locally — SIGN IN to sync it` : `${action} saved locally — syncs when back online`,
+      "warn", true,
+    );
+    if (res.needsLogin && (action === "out" || action === "outAt")) {
+      notifyAutoOut("Clock-out not synced", "Your session expired, so S&S still shows you clocked in. Click to reopen Desk and sign in — the clock-out syncs the moment you do.");
+    }
+  }
   pushState();
   return res;
 });

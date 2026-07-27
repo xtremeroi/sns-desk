@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.34 — 2026-07-24
+
+- **Updates can never fire on a stale clock state.** Desk now refuses to
+  self-apply an update unless it has confirmed you're clocked out against the
+  server within the last 5 minutes, you're signed in, and nothing is queued —
+  fixes the "S&S auto updated while I was clocked in" incident.
+- **A clock action that couldn't sync says so, loudly.** If a clock-out (or
+  any action) gets queued because you're offline or signed out, the panel
+  header says exactly that and what unblocks it — and a signed-out clock-out
+  additionally fires a notification, since S&S still shows you clocked in
+  until you sign back in.
+- **Auto clock-outs now tell the website why.** The reason (idle timeout,
+  screen locked, machine offline) rides to S&S with the clock-out, so the
+  Time page shows it on the session — no more guessing what clocked you out.
+
 ## 0.1.33 — 2026-07-22
 
 - **Managers now see every registry project.** The project dropdown was
