@@ -860,9 +860,13 @@ function applyHudPresence(hud) {
   if (hud) {
     popup.setAlwaysOnTop(true, "screen-saver");
     popup.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // The macOS window shadow draws a dark ring tight around the transparent
+    // shell (and ghosts on repaint) — the CSS glow is the only shadow HUD needs.
+    popup.setHasShadow(false);
   } else {
     popup.setVisibleOnAllWorkspaces(false);
     popup.setAlwaysOnTop(!!readSettings().pinnedOnTop, "floating");
+    popup.setHasShadow(true);
   }
 }
 ipcMain.handle("set-skin", (_e, skin) => {

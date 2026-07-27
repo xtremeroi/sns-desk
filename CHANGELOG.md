@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.37 — 2026-07-27
+
+- **HUD skin rendering fixes.** Text no longer has dark fringes baked around
+  the glyphs (transparent-window subpixel antialiasing), and the dark ring
+  hugging the panel is gone (the macOS window shadow is now disabled in HUD
+  mode — the glow border is the shadow).
+
 ## 0.1.36 — 2026-07-27
 
 - **HUD skin.** Click the ◧ button in the panel header to switch to a fully

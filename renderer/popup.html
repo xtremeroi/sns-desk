@@ -18,6 +18,9 @@
   }
   * { box-sizing: border-box; margin: 0; font-family: -apple-system, "SF Pro Text", sans-serif; }
   html, body { background: transparent; height: 100%; }
+  /* Transparent windows + subpixel AA = dark fringes baked around glyphs
+     (Chromium assumes an opaque backdrop). Grayscale AA renders clean. */
+  body { -webkit-font-smoothing: antialiased; }
   body { color: var(--text); font-size: 13px; padding: 10px; }
   .shell { background: var(--bg); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; height: 100%; }
   /* The header is the drag handle — manual drag via IPC, because CSS
