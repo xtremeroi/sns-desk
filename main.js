@@ -170,6 +170,27 @@ function trayIconFor(status) {
   return trayIcons[status];
 }
 
+// Opt-in Dock presence: the app icon appears in the Dock (and Cmd-Tab) with
+// a badge carrying the day's worked time — "3:42", "II 3:42" on break, clear
+// when clocked out. Toggled from the tray menu, persisted in settings.
+let lastBadge = null;
+function applyDockMode() {
+  if (!app.dock) return;
+  if (readSettings().dockTimer) app.dock.show();
+  else { app.dock.setBadge(""); lastBadge = null; app.dock.hide(); }
+}
+function fmtHM(ms) {
+  const m = Math.floor(ms / 60000);
+  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
+}
+function updateDockBadge(st) {
+  if (!app.dock || !readSettings().dockTimer) return;
+  const badge = st.status === "in" ? fmtHM(punch.workedMsToday())
+    : st.status === "break" ? `II ${fmtHM(punch.workedMsToday())}`
+    : "";
+  if (badge !== lastBadge) { lastBadge = badge; app.dock.setBadge(badge); }
+}
+
 let trayStatus = null;
 function updateTray() {
   if (!tray) return;
@@ -185,6 +206,7 @@ function updateTray() {
   if (st.status === "in") tray.setTitle(`▶ ${fmtTicker(punch.workedMsToday())}${flag}`);
   else if (st.status === "break") tray.setTitle(`❚❚ ${fmtTicker(punch.workedMsToday())}${flag}`);
   else tray.setTitle(flag.trim());
+  updateDockBadge(st);
 }
 
 function togglePopup() {
@@ -503,8 +525,17 @@ app.setPath("userData", path.join(app.getPath("appData"), "sns-desk"));
 // folders) can produce duplicates that double-track and fight over updates.
 if (!app.requestSingleInstanceLock()) app.quit();
 
+// Widget tiles link to snsdesk://open — clicking one focuses the panel.
+app.setAsDefaultProtocolClient("snsdesk");
+app.on("open-url", (e, url) => {
+  e.preventDefault();
+  if (String(url).startsWith("snsdesk://") && popup && !popup.isVisible()) togglePopup();
+});
+// Dock icon click (when Dock mode is on) opens the panel too.
+app.on("activate", () => { if (popup && !popup.isVisible()) togglePopup(); });
+
 app.whenReady().then(() => {
-  if (app.dock) app.dock.hide();
+  applyDockMode();
   snapshotPrevAlive();
   autoOut = readSettings().autoOut ?? null;
 
@@ -587,6 +618,15 @@ app.whenReady().then(() => {
         enabled: app.isPackaged,
         checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
         click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }),
+      },
+      {
+        label: "Show in Dock with timer",
+        type: "checkbox",
+        checked: !!readSettings().dockTimer,
+        click: (item) => {
+          writeSettings({ ...readSettings(), dockTimer: item.checked });
+          applyDockMode();
+        },
       },
       { type: "separator" },
       { label: "Quit S&S Desk (stop tracking)", click: () => quitFlow() },

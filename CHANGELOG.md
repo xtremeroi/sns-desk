@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.35 — 2026-07-26
+
+- **Optional Dock mode.** Right-click the menu bar icon and turn on "Show in
+  Dock with timer": the app appears in the Dock (and Cmd-Tab) with a live
+  badge carrying today's worked time — "3:42", "II 3:42" on break, clear when
+  clocked out. Clicking the Dock icon opens the panel. Off by default.
+- **Clicking a desktop widget now opens Desk.** The tiles always linked to
+  snsdesk://open; the app now actually answers that link.
+- **Over-delivery reads as a win.** The weekly progress widgets show "over"
+  in teal instead of alarm red — beating your allocation isn't an error.
+
 ## 0.1.34 — 2026-07-24
 
 - **Updates can never fire on a stale clock state.** Desk now refuses to

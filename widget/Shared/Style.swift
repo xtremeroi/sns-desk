@@ -85,7 +85,9 @@ func fmtHours(_ h: Double) -> String {
 // Weekly-progress bar color by budget status.
 func budgetColor(_ status: String) -> Color {
     switch status {
-    case "over": return SNS.red
+    // Over-delivery reads as an achievement, not an alarm — teal, distinct
+    // from on-track green (Randy 2026-07-26; was red).
+    case "over": return Color(red: 0.20, green: 0.83, blue: 0.75)
     case "at", "ok": return SNS.green
     default: return SNS.accent   // "behind" — still working toward the target
     }
