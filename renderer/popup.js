@@ -304,6 +304,7 @@ function fmtClock(ms) {
 function aoMessage(ao) {
   const t = fmtClock(ao.outAt);
   const mins = ao.minutes ? ` for ${ao.minutes} minutes` : "";
+  if (ao.reason === "break10") return `Clocked out at ${t} — your 10-minute break ended and you hadn't returned.`;
   if (ao.reason === "idle") return `Clocked out at ${t} — idle${mins}.`;
   if (ao.reason === "away") return `Clocked out at ${t}, when this Mac locked — away${mins}.`;
   if (ao.reason === "offline") return `Clocked out at ${t} — this Mac went offline while clocked in.`;

@@ -640,6 +640,9 @@ app.whenReady().then(() => {
         checked: !!readSettings().dockTimer,
         click: (item) => {
           writeSettings({ ...readSettings(), dockTimer: item.checked });
+          // Recompute HUD presence too: with the Dock timer on, HUD must give
+          // up the full-screen overlay (accessory policy would kill the tile).
+          applyHudPresence(readSettings().skin === "hud");
           applyDockMode();
         },
       },
@@ -814,8 +817,23 @@ let timedBreakUntil = null;
 setInterval(() => {
   try {
     if (!timedBreakUntil || Date.now() < timedBreakUntil) return;
+    const until = timedBreakUntil;
     timedBreakUntil = null;
-    if (punch.state().status !== "break") return;
+    const st = punch.state();
+    if (st.status !== "break") return;
+    // Only resume someone who is actually BACK. If the machine is still idle
+    // when the capped break lapses, they overstayed it — clock out at the
+    // break's end with that as the stated reason, instead of a phantom
+    // resume that the idle watchdog would later kill with a confusing
+    // "idle for N minutes" message.
+    if (powerMonitor.getSystemIdleTime() > 90) {
+      punch.act("outAt", { outAtMs: until, lock: true, reason: "brk" }).then(() => {
+        raiseAutoOut("break10", until, { client: st.client, project: st.project });
+        notifyAutoOut("Clocked out — break ended", "Your 10-minute break ended and you hadn't returned, so you were clocked out when it lapsed. Click to reopen Desk — one click clocks you back in.");
+        pushState();
+      }).catch(() => {});
+      return;
+    }
     punch.act("resume").then(() => {
       new Notification({ title: "Break's over", body: "You're clocked back in — the timed break ended." }).show();
       pushState();
@@ -888,9 +906,15 @@ ipcMain.handle("toggle-mini", () => {
 // pin preference.
 function applyHudPresence(hud) {
   if (!popup || popup.isDestroyed()) return;
+  const dockOn = !!readSettings().dockTimer;
   if (hud) {
     popup.setAlwaysOnTop(true, "screen-saver");
-    popup.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // visibleOnFullScreen forces the app into ACCESSORY activation policy,
+    // which kills the Dock tile and resets its custom timer icon — macOS
+    // makes overlay-fullscreen and Dock presence mutually exclusive. With
+    // Dock mode on, HUD keeps every-Space float but yields the full-screen
+    // overlay; with Dock mode off it overlays full-screen apps too.
+    popup.setVisibleOnAllWorkspaces(true, dockOn ? {} : { visibleOnFullScreen: true });
     // The macOS window shadow draws a dark ring tight around the transparent
     // shell (and ghosts on repaint) — the CSS glow is the only shadow HUD needs.
     popup.setHasShadow(false);
@@ -899,6 +923,9 @@ function applyHudPresence(hud) {
     popup.setAlwaysOnTop(!!readSettings().pinnedOnTop, "floating");
     popup.setHasShadow(true);
   }
+  // Presence changes flip activation policy under the hood — re-assert the
+  // Dock tile and its timer icon after any of them.
+  if (dockOn) { lastDockKey = null; applyDockMode(); }
 }
 ipcMain.handle("set-skin", (_e, skin) => {
   writeSettings({ ...readSettings(), skin: String(skin ?? "classic") });

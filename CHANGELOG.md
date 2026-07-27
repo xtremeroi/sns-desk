@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.43 — 2026-07-27
+
+- **Overstaying a "10" break now says so.** If the capped break lapses and
+  you haven't returned (machine still idle), Desk no longer "resumes" you
+  into a phantom session that the idle watchdog later kills with a confusing
+  "idle for N minutes" message — you're clocked out at the moment the break
+  ended, and the banner, notification, and Time page all state the real
+  reason: your 10-minute break ended and you hadn't returned. Coming back
+  before the break lapses still resumes you normally.
+- **Dock timer and HUD skin now coexist.** macOS forbids an app from both
+  overlaying full-screen apps and keeping a Dock tile — HUD's full-screen
+  flag was silently resetting the Dock timer to the plain app icon. With the
+  Dock timer on, HUD now keeps its every-Space always-on-top float but yields
+  the full-screen overlay, and the timer icon re-asserts after every skin or
+  Dock toggle. Turn the Dock timer off if you want HUD over full-screen apps.
+- **Stale clock-out banners retire themselves.** If you clock back in from
+  another machine, this Mac's "you were clocked out" banner now clears on the
+  next sync instead of resurfacing old news the next time you clock out here.
+
 ## 0.1.42 — 2026-07-27
 
 - **No more white bar under the HUD.** System scrollbars were painting as
