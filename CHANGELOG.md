@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.50 — 2026-08-12
+
+- **A mid-shift sign-out can no longer eat your time.** Three layers:
+  - If your session expires while clocked in, Desk now fires an immediate
+    notification and a persistent panel warning — not just a small glyph.
+  - If S&S's watchdog closes your session while Desk was actually running
+    the whole time (alive but signed out), signing back in now RESTORES the
+    session automatically through the audited self-edit path — the clock
+    never really stopped, and the restore is flagged on the Time page.
+  - The existing rule stands: everything tracked locally syncs the moment
+    you sign in; nothing is lost.
+
 ## 0.1.49 — 2026-07-27
 
 - **Pick what the menu bar timer counts.** Right-click the menu bar icon →

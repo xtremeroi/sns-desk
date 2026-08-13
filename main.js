@@ -508,7 +508,21 @@ function assignedClientIds() {
   return [...ids];
 }
 
+// A session expiring MID-SHIFT is an emergency, not a glyph: the watchdog
+// will close the clock ~an hour later if sign-in doesn't happen. Yell once
+// per episode.
+let wasNeedsLogin = false;
+function watchLoginTransition() {
+  const nl = needsLogin || (punch && punch.needsLogin);
+  if (nl && !wasNeedsLogin && punch && punch.state().status !== "out") {
+    notifyAutoOut("Sign in now — your clock is at risk", "Your S&S session expired mid-shift. Desk keeps tracking locally, but S&S can't see this Mac and may close your session. Click to open Desk and sign in — everything syncs the moment you do.");
+    sendUpdateStatus("session expired — SIGN IN to protect your clock", "warn", true);
+  }
+  wasNeedsLogin = !!nl;
+}
+
 function pushState() {
+  watchLoginTransition();
   // Clocking back in (any path) retires the auto-out banner.
   if (autoOut && punch && punch.state().status !== "out") clearAutoOut();
   updateTray();
@@ -633,7 +647,25 @@ app.whenReady().then(() => {
   punch = new Punch(app.getPath("userData"), () => updateTray());
   // The server closed a session we thought was open (dead-machine watchdog,
   // 12h cap) — surface it, unless a local watchdog already raised the banner.
-  punch.onAutoClosedRemotely = (info) => {
+  punch.onAutoClosedRemotely = async (info) => {
+    // The watchdog can't tell "machine dead" from "Desk alive but signed
+    // out" — but THIS process can. If Desk ran through the whole gap with
+    // the person locally still clocked in (our own idle watchdog stayed
+    // armed the entire time, so local "in" is presence evidence), the close
+    // was wrong: RESTORE the session through the audited self-edit path and
+    // keep the clock running. Skylar lost 48 minutes to exactly this.
+    const gapMs = Date.now() - info.outAt;
+    const deskRanThroughGap = process.uptime() * 1000 > gapMs;
+    if (info.autoR === "srv" && info.date && info.inMs && deskRanThroughGap && gapMs < 11 * 3600000) {
+      const restored = await punch.restoreSession(info.date, info.inMs).catch(() => false);
+      if (restored) {
+        const t = new Date(info.outAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        notifyAutoOut("Session restored", `S&S had clocked you out at ${t} while Desk was signed out, but this Mac was active the whole time — your session was restored and the clock never really stopped. The restore is flagged on the Time page for review.`);
+        sendUpdateStatus("session restored — no time lost", "ok", true);
+        pushState();
+        return;
+      }
+    }
     if (autoOut) return;
     raiseAutoOut("server", info.outAt, { client: info.client, project: info.project });
     notifyAutoOut("Clocked out by S&S", "S&S closed your session after this Mac stopped responding. Click to reopen Desk — one click clocks you back in.");
