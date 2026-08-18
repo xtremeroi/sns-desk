@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.51 — 2026-08-17
+
+- **Mini timer mode fits again.** The sign-in banner (shown since 0.1.46 so
+  you can always reach Sign in) could push the ticker through the panel's
+  bottom border, and the HUD skin kept the ticker's box border in mini mode.
+  Content now clips cleanly inside the shell, and while a sign-in is needed
+  in mini mode the banner takes the space — the clock returns the moment
+  you're signed in.
+
 ## 0.1.50 — 2026-08-12
 
 - **A mid-shift sign-out can no longer eat your time.** Three layers:

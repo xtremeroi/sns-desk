@@ -83,6 +83,7 @@ function render() {
   $("pin").title = state.pinned ? "Unpin (stop floating above other windows)" : "Pin on top of other windows";
   $("who").textContent = state.actor ?? "";
   $("banner").style.display = state.needsLogin ? "flex" : "none";
+  document.body.classList.toggle("needs-login", !!state.needsLogin);
 
   // Roster select (keep selection stable across pushes). Employees only see
   // clients they're ASSIGNED to (any budget line); managers see everything.

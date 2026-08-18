@@ -129,6 +129,14 @@
   body.hud .syncmsg, body.hud .syncmsg.warn, body.hud .pendbadge, body.hud .quitbtn:hover { color: var(--hud); }
   body.hud ::selection { background: var(--hud-soft); }
   body.hud ::-webkit-scrollbar-thumb { background: var(--hud-dim); }
+  /* ── Mini-mode fit fixes (after HUD so they win the cascade) ─────────────
+     Content must never draw past the shell border, and in mini mode the
+     sign-in banner takes the space — the ticker yields until signed in. */
+  .shell { overflow: hidden; }
+  @media (max-height: 219px) {
+    body.hud .pill { border: none; box-shadow: none; background: none; }
+    body.needs-login .pill, body.needs-login .sub { display: none !important; }
+  }
 </style>
 </head>
 <body>
