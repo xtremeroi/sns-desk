@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.52 — 2026-10-05
+
+- **Always asks you to sign in again when your session ends.** Since Oct 1,
+  an expired session could come back from Cloudflare as an "invalid token"
+  answer instead of the usual login redirect, and Desk treated it as a
+  temporary error: no name, only "No client (General)", and no sign-in
+  banner. Desk now recognizes that answer as an expired session and shows
+  the Sign in banner. (The server side was also fixed on Oct 5.)
+
 ## 0.1.51 — 2026-08-17
 
 - **Mini timer mode fits again.** The sign-in banner (shown since 0.1.46 so
