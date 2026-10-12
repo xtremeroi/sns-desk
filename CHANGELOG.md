@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.53 — 2026-10-12
+
+- **The collapsed timer tells you how to get back.** Double-clicking the
+  header collapses Desk to just the clock, and Desk remembers that size
+  through restarts. Clocked out in that view there was no Clock in button
+  and no hint, so it looked broken. It now shows "Collapsed view. Click
+  here (or double-click the title) to expand and clock in", and clicking
+  that line expands the panel.
+
 ## 0.1.52 — 2026-10-05
 
 - **Always asks you to sign in again when your session ends.** Since Oct 1,
