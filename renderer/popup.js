@@ -387,6 +387,8 @@ document.querySelector(".hdr").addEventListener("dblclick", (e) => {
   if (e.target.closest("button")) return;
   sns.toggleMini();
 });
+$("minihint").addEventListener("click", () => sns.toggleMini());
+$("minihint").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") sns.toggleMini(); });
 window.addEventListener("mouseup", () => sns.dragEnd());
 window.addEventListener("blur", () => sns.dragEnd());
 

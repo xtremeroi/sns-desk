@@ -136,7 +136,12 @@
   @media (max-height: 219px) {
     body.hud .pill { border: none; box-shadow: none; background: none; }
     body.needs-login .pill, body.needs-login .sub { display: none !important; }
+    /* Clocked out in mini mode there is nothing to act on, so say how to get
+       back (Nina, 2026-10-12: a stray header double-click left only "Clocked
+       out" on screen, and restarting kept the collapsed size). */
+    body.st-out:not(.needs-login) .minihint { display: block; }
   }
+  .minihint { display: none; margin-top: 6px; font-size: 11.5px; color: var(--accent); cursor: pointer; text-align: center; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -178,6 +183,7 @@
   <div class="pill">
     <div class="ticker out" id="ticker">Clocked out</div>
     <div class="sub" id="sub"></div>
+    <div class="minihint" id="minihint" role="button" tabindex="0">Collapsed view. Click here (or double-click the title) to expand and clock in.</div>
     <select id="client"></select>
     <select id="project" style="display:none"></select>
     <input type="text" id="note" placeholder="What are you working on? (optional)" maxlength="80" />
