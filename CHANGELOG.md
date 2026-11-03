@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.55 — 2026-11-02
+
+- **Sign in through your browser.** Clicking Sign in now opens S&S in your
+  regular browser (usually Chrome), where you're often already signed in.
+  Your browser then asks to open S&S Desk; choose Open. Desk never shows a
+  password page anymore, and the old sign-in window inside Desk is gone.
+  The session handed back to Desk is encrypted so only your copy of Desk
+  can read it.
+
 ## 0.1.54 — 2026-11-02
 
 - **Nothing is tracked during breaks.** App activity is recorded only while

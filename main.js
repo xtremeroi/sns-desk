@@ -12,17 +12,13 @@ const { Punch } = require("./lib/punch");
 const { LeaveWatch } = require("./lib/leave");
 const widgetBridge = require("./lib/widget-bridge");
 const { autoUpdater } = require("electron-updater");
+const crypto = require("crypto");
 
-// Google blocks sign-in inside webviews that identify as Electron, and a
-// Chrome UA fails its client-hints cross-check ("this browser or app may not
-// be secure" at the password step). A Firefox UA carries no client hints to
-// contradict, so Google treats the login window as a real browser.
+// User agent for Desk's own API calls to S&S (no sign-in happens in Desk).
 const CHROME_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
-const FIREFOX_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0";
 
 let tray = null;
 let popup = null;
-let loginWin = null;
 let punch = null;
 let tracker = null;
 let leaveWatch = null;
@@ -335,42 +331,58 @@ function createPopup() {
   popup.on("resized", saveBounds);
 }
 
+// ── Sign-in ───────────────────────────────────────────────────────────────
+// Default: sign in through the user's REAL browser (Chrome, usually already
+// signed in), never a password page inside Desk (Bijan's review, 2026-11-02;
+// OAuth's native-app guidance). Desk makes a one-time RSA key pair and opens
+// sns.xtremeroi.com/api/desk-auth with the public key. After the normal Access
+// + Auth0 sign-in there, S&S encrypts the session to that key and sends it
+// back via snsdesk://auth, which only this Desk can decrypt.
+let pendingAuth = null; // { privateKey, state, at }
 function openLogin() {
-  if (loginWin && !loginWin.isDestroyed()) { loginWin.focus(); return; }
-  loginWin = new BrowserWindow({
-    width: 900,
-    height: 720,
-    title: "Sign in to S&S",
-    webPreferences: { partition: undefined }, // default session = shared cookie jar
-  });
-  loginWin.webContents.setUserAgent(FIREFOX_UA);
-  // Hardening (Bijan's review, 2026-11-02): the sign-in window may only move
-  // between https pages and can't open new windows; anything a page tries to
-  // pop out goes to the user's real browser instead.
-  loginWin.webContents.on("will-navigate", (e, url) => {
-    if (!/^https:\/\//i.test(url)) e.preventDefault();
-  });
-  loginWin.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https:\/\//i.test(url)) shell.openExternal(url);
-    return { action: "deny" };
-  });
-  loginWin.loadURL(api.BASE);
-  // After every navigation, probe the API; once it answers JSON we're in.
-  const probe = async () => {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", { modulusLength: 3072 });
+  const pub = publicKey.export({ type: "spki", format: "der" }).toString("base64url");
+  const state = crypto.randomBytes(24).toString("base64url");
+  pendingAuth = { privateKey, state, at: Date.now() };
+  const authUrl = `${api.BASE}/api/desk-auth?pub=${pub}&state=${state}`;
+  // Test hook: print the link instead of opening a browser (pub/state aren't secret).
+  if (process.env.SNSDESK_AUTH_PRINT) { fs.writeFileSync(process.env.SNSDESK_AUTH_PRINT, authUrl); return; }
+  shell.openExternal(authUrl);
+}
+
+async function handleAuthCallback(url) {
+  const p = pendingAuth;
+  try {
+    const u = new URL(url);
+    if (!p || u.searchParams.get("state") !== p.state || Date.now() - p.at > 15 * 60000) return;
+    const key = crypto.privateDecrypt(
+      { key: p.privateKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, oaepHash: "sha256" },
+      Buffer.from(u.searchParams.get("k") ?? "", "base64url"));
+    const iv = Buffer.from(u.searchParams.get("iv") ?? "", "base64url");
+    const all = Buffer.from(u.searchParams.get("ct") ?? "", "base64url");
+    const d = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    d.setAuthTag(all.subarray(all.length - 16));
+    const msg = JSON.parse(Buffer.concat([d.update(all.subarray(0, all.length - 16)), d.final()]).toString("utf8"));
+    if (msg.state !== p.state || typeof msg.jwt !== "string" || !msg.jwt) return;
+    pendingAuth = null;
+    await session.defaultSession.cookies.set({
+      url: api.BASE, name: "CF_Authorization", value: msg.jwt,
+      secure: true, httpOnly: true, sameSite: "lax",
+      ...(msg.exp ? { expirationDate: Number(msg.exp) } : {}),
+    });
     const res = await api.getGlobal();
     if (res.ok) {
+      if (process.env.SNSDESK_DEBUG) console.log("[sns-desk] browser sign-in ok as", res.body && res.body.actor);
       onAuthed(res.body);
-      if (loginWin && !loginWin.isDestroyed()) loginWin.close();
+      if (popup && !popup.isVisible()) togglePopup();
+    } else if (process.env.SNSDESK_DEBUG) {
+      console.log("[sns-desk] browser sign-in: session stored but S&S still refused", res.status);
     }
-  };
-  loginWin.webContents.on("did-navigate", probe);
-  loginWin.webContents.on("did-navigate-in-page", probe);
-  loginWin.on("closed", () => { loginWin = null; });
-  if (process.env.SNSDESK_DEBUG) {
-    loginWin.webContents.on("did-navigate", (_e, url) => console.log("[sns-desk] login navigated:", url.split("?")[0]));
-    loginWin.webContents.on("did-fail-load", (_e, code, desc, url) => console.log("[sns-desk] login load failed:", code, desc, url.split("?")[0]));
+  } catch (e) {
+    if (process.env.SNSDESK_DEBUG) console.log("[sns-desk] browser sign-in failed:", e && e.message);
   }
 }
+
 
 function onAuthed(body) {
   needsLogin = false;
@@ -615,6 +627,7 @@ if (!app.requestSingleInstanceLock()) app.quit();
 app.setAsDefaultProtocolClient("snsdesk");
 app.on("open-url", (e, url) => {
   e.preventDefault();
+  if (String(url).startsWith("snsdesk://auth")) { handleAuthCallback(String(url)); return; }
   if (String(url).startsWith("snsdesk://") && popup && !popup.isVisible()) togglePopup();
 });
 // Dock icon click (when Dock mode is on) opens the panel too.

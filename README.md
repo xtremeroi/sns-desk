@@ -41,11 +41,14 @@ what it does and doesn't collect. The short version, verifiable in
 
 ## Auth
 
-Desk never sees or stores your password. A login window completes the normal
-Auth0 + Cloudflare Access flow at sns.xtremeroi.com once; Cloudflare's
-`CF_Authorization` session cookie is then saved in Desk's own browser profile
-on this Mac (like any browser keeps you signed in) and authenticates API calls
-until the session expires. When it
+Desk never sees or stores your password, and it has no sign-in page of its
+own. "Sign in" opens sns.xtremeroi.com/api/desk-auth in your default browser
+with a one-time public key; after the normal Auth0 + Cloudflare Access sign-in
+there, S&S encrypts the session to that key and returns it through
+`snsdesk://auth`, which only this copy of Desk can decrypt. Desk saves it as
+its `CF_Authorization` session cookie (in Desk's own profile on this Mac) and
+uses it for API calls until the session expires, then asks you to sign in
+again. When it
 expires, the tray shows ⚠ and the popup offers "Sign in" — tracked time queues
 locally in the meantime.
 
