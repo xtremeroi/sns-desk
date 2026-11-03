@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'" />
 <style>
   :root {
     /* S&S dark navy (--bg #0a1020 / --panel #101a2e), translucent so the
@@ -200,7 +201,7 @@
     <div class="muted-note" id="mutednote" style="display:none"></div>
   </div>
   <div class="ftr">
-    <span class="muted-note">app names only · recorded only while clocked in</span>
+    <span class="muted-note">app names only · recorded only while clocked in, never on breaks</span>
     <span class="spacer"></span>
     <button class="ftrbtn" id="timepage" title="Open the S&S Time page" aria-label="Open the S&S Time page">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>

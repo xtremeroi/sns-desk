@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.54 — 2026-11-02
+
+- **Nothing is tracked during breaks.** App activity is recorded only while
+  you're clocked in and working. When you start a break, tracking stops and
+  the running block closes; it picks up again when you resume.
+- **Security update: Electron 45.** Desk now runs on a currently supported
+  Electron (was 31, which stopped receiving security fixes in January 2025).
+  Requires macOS 12 or later.
+- **Hardening.** The Desk panel has a strict content security policy; the
+  sign-in window can only move between secure (https) pages and can't open
+  new windows (anything it tries to open goes to your browser); Desk's pages
+  are refused every browser permission (camera, mic, location and so on).
+- README now says plainly that the sign-in session cookie is kept in Desk's
+  own profile on your Mac, the way a browser keeps you signed in.
+
 ## 0.1.53 — 2026-10-12
 
 - **The collapsed timer tells you how to get back.** Double-clicking the

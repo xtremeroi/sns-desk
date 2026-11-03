@@ -25,7 +25,7 @@ what it does and doesn't collect. The short version, verifiable in
   clock in / break / resume / clock out and client attribution. Speaks the
   exact same `/api/store` punch protocol as the web app, so the header pill,
   Time page, and billing views all stay in sync.
-- **Desktop-wide activity tracking, only while clocked in** — samples the
+- **Desktop-wide activity tracking, only while clocked in and not on a break** — samples the
   frontmost application every 30s (app **names only**, never window titles or
   content; idle-gated at 5 min). Clocked out = the tracker is off entirely.
   Recorded blocks show in the popup's "Today on this Mac" view and post to
@@ -41,9 +41,11 @@ what it does and doesn't collect. The short version, verifiable in
 
 ## Auth
 
-No credentials are stored. A login window completes the normal Auth0 +
-Cloudflare Access flow at sns.xtremeroi.com once; the persisted
-`CF_Authorization` cookie (24h session) authenticates API calls. When it
+Desk never sees or stores your password. A login window completes the normal
+Auth0 + Cloudflare Access flow at sns.xtremeroi.com once; Cloudflare's
+`CF_Authorization` session cookie is then saved in Desk's own browser profile
+on this Mac (like any browser keeps you signed in) and authenticates API calls
+until the session expires. When it
 expires, the tray shows ⚠ and the popup offers "Sign in" — tracked time queues
 locally in the meantime.
 

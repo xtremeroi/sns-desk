@@ -344,6 +344,16 @@ function openLogin() {
     webPreferences: { partition: undefined }, // default session = shared cookie jar
   });
   loginWin.webContents.setUserAgent(FIREFOX_UA);
+  // Hardening (Bijan's review, 2026-11-02): the sign-in window may only move
+  // between https pages and can't open new windows; anything a page tries to
+  // pop out goes to the user's real browser instead.
+  loginWin.webContents.on("will-navigate", (e, url) => {
+    if (!/^https:\/\//i.test(url)) e.preventDefault();
+  });
+  loginWin.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https:\/\//i.test(url)) shell.openExternal(url);
+    return { action: "deny" };
+  });
   loginWin.loadURL(api.BASE);
   // After every navigation, probe the API; once it answers JSON we're in.
   const probe = async () => {
@@ -356,6 +366,10 @@ function openLogin() {
   loginWin.webContents.on("did-navigate", probe);
   loginWin.webContents.on("did-navigate-in-page", probe);
   loginWin.on("closed", () => { loginWin = null; });
+  if (process.env.SNSDESK_DEBUG) {
+    loginWin.webContents.on("did-navigate", (_e, url) => console.log("[sns-desk] login navigated:", url.split("?")[0]));
+    loginWin.webContents.on("did-fail-load", (_e, code, desc, url) => console.log("[sns-desk] login load failed:", code, desc, url.split("?")[0]));
+  }
 }
 
 function onAuthed(body) {
@@ -588,7 +602,10 @@ async function flushBeforeQuit(maxMs = 4000) {
 // ── App lifecycle ───────────────────────────────────────────────────────────
 // Stable data location for dev (`electron .` would otherwise use "Electron")
 // and packaged builds alike.
-app.setPath("userData", path.join(app.getPath("appData"), "sns-desk"));
+// SNSDESK_USERDATA points a test run at a throwaway folder, so testing a new
+// build never touches the real profile on that Mac (macOS resolves appData
+// regardless of $HOME). Unset in normal use.
+app.setPath("userData", process.env.SNSDESK_USERDATA || path.join(app.getPath("appData"), "sns-desk"));
 
 // One instance only. Login items + stray copies (Downloads, custom "startup"
 // folders) can produce duplicates that double-track and fight over updates.
@@ -604,6 +621,14 @@ app.on("open-url", (e, url) => {
 app.on("activate", () => { if (popup && !popup.isVisible()) togglePopup(); });
 
 app.whenReady().then(() => {
+  // Desk's pages never need the camera, mic, location, notifications or any
+  // other browser permission (notifications come from the main process), so
+  // every page permission request is refused.
+  session.defaultSession.setPermissionRequestHandler((_wc, _perm, cb) => cb(false));
+  session.defaultSession.setPermissionCheckHandler(() => false);
+  // Test hook: open the sign-in window at launch so a build can be checked
+  // without clicking through the tray.
+  if (process.env.SNSDESK_OPEN_LOGIN) setTimeout(() => openLogin(), 1500);
   applyDockMode();
   snapshotPrevAlive();
   autoOut = readSettings().autoOut ?? null;
@@ -680,7 +705,10 @@ app.whenReady().then(() => {
   tracker = new Tracker({
     userData: app.getPath("userData"),
     getIdleSeconds: () => powerMonitor.getSystemIdleTime(),
-    isPunchedIn: () => punch.state().status !== "out",
+    // Only while actively clocked in: a break is the person's own time, so
+    // nothing is observed or uploaded during it (Randy, 2026-11-02, after
+    // Bijan's review). The tracker closes the running block when this flips.
+    isPunchedIn: () => punch.state().status === "in",
     postSegment: (date, block) => api.putTimeSegment(date, block),
     excludeApps: () => readSettings().excludeApps ?? [],
     idleBaseMin: () => globalState.timeIdleMin ?? 10,
