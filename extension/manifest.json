@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "S&S Desk Companion",
+  "version": "1.2.8",
+  "description": "Logs time in your browser and syncs it to your Stats & Strats timesheet, so client hours are captured automatically.",
+  "permissions": [
+    "tabs",
+    "idle",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://sns.xtremeroi.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://sns.xtremeroi.com/*"
+      ],
+      "js": [
+        "presence.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
