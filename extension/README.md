@@ -9,8 +9,19 @@ What it reads and when:
 - Only the hostname of your active tab, once a minute. Never URLs, page
   titles, or page content. Sites not on the list are ignored entirely.
 - Only while you're clocked in to S&S and not on a break. Clocked out or on
-  a break, nothing is sampled.
+  a break, nothing is sampled, and any sample that lands in the minute a
+  break starts or the clock stops is cut against the punch record before it
+  uploads. Activity blocks never span a break or a clock-out.
+- Only while Chrome is the app in front. Switch to another app and Chrome
+  stops counting (S&S Desk tracks the other app).
 - Only while your computer is active (idle over 5 minutes stops sampling).
+
+What it tracks is visible: click the extension icon to see every work
+platform, every client site S&S has supplied, and what's never tracked. The
+built-in list is in `sites.js`. S&S can add specific client storefronts, but
+`vetClientSites()` refuses anything personal or general-purpose (YouTube,
+Amazon.com shopping, whole shared hosts like myshopify.com, and so on), and
+any change to the client list shows a "!" badge on the icon until you open it.
 
 ## Install
 From the Chrome Web Store (recommended):

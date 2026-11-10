@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>S&amp;S Desk Companion</title>
+<style>
+  :root { color-scheme: light dark; --dim: #6b7280; --line: #e5e7eb; --new: #d97706; --ok: #059669; }
+  @media (prefers-color-scheme: dark) { :root { --dim: #9ca3af; --line: #374151; } }
+  body { font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; width: 340px; margin: 0; padding: 14px 16px 16px; }
+  h1 { font-size: 15px; margin: 0 0 2px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--dim); margin: 16px 0 6px; }
+  .status { margin: 8px 0 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .status b { font-weight: 600; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--dim); margin-right: 6px; vertical-align: 1px; }
+  .dot.on { background: var(--ok); }
+  .change { margin-top: 10px; padding: 8px 10px; border: 1px solid var(--new); border-radius: 8px; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+  li span:last-child { color: var(--dim); text-align: right; word-break: break-all; }
+  .tag { color: var(--new); font-weight: 600; margin-left: 4px; }
+  .note { color: var(--dim); margin: 6px 0 0; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+  <h1>S&amp;S Desk Companion</h1>
+  <div id="version" class="note"></div>
+  <div class="status" id="status"></div>
+  <div id="change"></div>
+
+  <h2>When it records</h2>
+  <p class="note" style="margin-top:0">Only while you're clocked in to S&amp;S and not on a break, Chrome is the app in front, and your computer has been active in the last 5 minutes. It reads only the site name of your active tab, never the full URL, the page title, or anything on the page.</p>
+
+  <h2>Work platforms</h2>
+  <ul id="builtin"></ul>
+
+  <h2>Client sites from S&amp;S</h2>
+  <ul id="client"></ul>
+  <p class="note" id="clientNote"></p>
+
+  <h2>Never tracked</h2>
+  <ul id="deny"></ul>
+  <p class="note">Any site not listed above is ignored entirely.</p>
+
+  <script src="sites.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
